@@ -32,7 +32,7 @@ The tool processes content provided as one or more AsciiDoc files typically stor
    
    Using `uv` (recommended):
    ```bash
-   uv venv
+   uv venv -p python3.12
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
    
