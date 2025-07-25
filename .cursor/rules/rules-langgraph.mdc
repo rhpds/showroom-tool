@@ -1,0 +1,12 @@
+---
+description: Rules for LangGraph Usage
+globs: *.py
+alwaysApply: false
+---
+
+# LangGraph Rules
+
+- Follow the users instructions exactly
+- Default to the simplest possible graph
+- Do not add nodes and edges that have not been requested 
+- Refer to the LangGraph Documentation using inbuilt cursor tooling or MCP Server `context7`

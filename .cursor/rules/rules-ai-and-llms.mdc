@@ -1,0 +1,52 @@
+---
+description: General rules for AI code
+globs: *.py
+alwaysApply: false
+---
+
+# AI and LLM Code
+# 
+
+## Frameworks
+
+- Default to OpenAI and the `responses` API
+- Default to LangGraph for Agentic AI
+- Where OpenAI lacks support eg 3rd party integrations like Confluence etc use LangChain
+- However avoid introducing LangChain for simple inference
+
+## Patterns
+
+- If using Pydantic always refer to the `rules-pydantic.mdc` rules file
+
+## Calling LLMs with Pydantic and Structured Outputs
+
+- Always default to OpenAI `responses` API
+- Validate your code with the upstream documentation using inbuilt documentation tools or MCP Server `context7`
+- Write clean API calls and always request Structured Outputs based on Pydantic V2 Base Classes. e.g.
+<EXAMPLE>
+```py
+from openai import OpenAI
+from pydantic import BaseModel
+
+client = OpenAI()
+
+class CalendarEvent(BaseModel):
+    name: str
+    date: str
+    participants: list[str]
+
+response = client.responses.parse(
+    model="gpt-4o-2024-08-06",
+    input=[
+        {"role": "system", "content": "Extract the event information."},
+        {
+            "role": "user",
+            "content": "Alice and Bob are going to a science fair on Friday.",
+        },
+    ],
+    text_format=CalendarEvent,
+)
+
+event = response.output_parsed
+```
+</EXAMPLE>

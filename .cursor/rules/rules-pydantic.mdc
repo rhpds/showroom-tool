@@ -1,0 +1,31 @@
+---
+description: Rules for using Pydantic
+globs: *.py
+alwaysApply: false
+---
+
+# Pydantic Rules
+
+- Always use Pydantic V2
+
+## Example Base Class Style
+
+- Keep base classes clean
+- Do not add extra variables that have not been requested
+- Do not add validators unless requested
+- Always use the following style
+
+```py
+class BaseContentSummary(BaseModel):
+    """Base class for all content summaries with common fields."""
+    content_type: str = Field(
+        ...,
+        description="Type of content (meeting, news, tutorial, general)",
+        avoid_processing=True
+    )
+    processing_metadata: ProcessingMetadata = Field(
+        ...,
+        description="Processing metadata including: timestamp, llm_provider, model_name, model_version, processing_duration, etc.",
+        avoid_processing=True
+    )
+```

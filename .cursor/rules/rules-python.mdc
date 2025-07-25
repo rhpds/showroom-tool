@@ -1,0 +1,27 @@
+---
+description:
+globs: *.py
+alwaysApply: false
+---
+
+# Python Rules
+
+## General Rules
+
+- Clear project structure with separate directories for source code, tests, docs, and config.
+- Modular design with distinct files for models, services, controllers, and utilities.
+- Well commented code and functions throughout **strive for clarity**
+- Detailed documentation using docstrings and README files.
+- Configuration management using environment variables.
+- Avoid overly complex code and configuration **strive for simplicity**
+- Crete comprehensive testing with pytest.
+- Dependency management via uv and virtual environments.
+- Code style consistency using Ruff.
+- AI-friendly coding practices: descriptive names, type hints, detailed comments, and rich error context.
+
+## Runtime Rules
+
+- **Always** execute code in the local `venv` via `uv`
+- Create a `pyproject.toml` and maintain
+
+##  
