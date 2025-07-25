@@ -23,5 +23,5 @@ alwaysApply: false
 
 - **Always** execute code in the local `venv` via `uv`
 - Create a `pyproject.toml` and maintain
-
-##  
+- All executable Python files should start with a shebang `#!/usr/bin/env python``
+  
