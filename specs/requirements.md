@@ -20,6 +20,11 @@ The labs and demos are made available via a Catalog called RHDP and its associat
 
 ## Requirements 
 
+- User is familiar with python and virtual environments (`venv`)
+- User already has `python3.12` or understands how to add it
+
+### 1. Setup the repository and basic python dependencies
+
 **User Story:** As a technical end user and/or developer I want a well maintained Python repo which is simple to:
 
 - Clone the directory
@@ -28,12 +33,7 @@ The labs and demos are made available via a Catalog called RHDP and its associat
   - Install the requirements
   - Start using, developing, or testing the `showroom-tool`
 
-**Assumptions:**
-
-- User is familiar with python and virtual environments (`venv`)
-- User already has `python3.12` or understands how to add it
-
-### 1. Setup the repository and basic python dependencies
+**Implement:**
 
 - Read ALL the rules files in `.cursor/rules/` for guidelines and context
 - Create a well structured `.gitignore` for a Python based repository
@@ -42,5 +42,26 @@ The labs and demos are made available via a Catalog called RHDP and its associat
   - `uv` used throughout
 - Create a README.md and populate
 
-**Further requirements will be added as the application progresses.**
+### 2. Create the Showroom Pydantic BaseModel
 
+**User Story:** As the developer I am going to deal frequently with the lab and demo content and need a Pydantic BaseModel called `Showroom` to hold this data
+
+**Implement:**
+
+- Create the Showroom BaseModel in `./config/basemodels.py`
+```
+lab_name: str, description="The name of the lab extracted from the Showroom Git Repo"
+git_url: str, description="The url of the Showroom Git Repo"
+git_ref: str(default='main`), description="The git tag or branch to use, defaults to main"
+modules: array of str, description="Array containing the raw asciidoc modules in sequence"
+```
+
+**Rules**
+
+- Simply build the BaseModel, no need to add any extra functionality at this point
+
+
+
+
+
+**Further requirements will be added as the application progresses.**
