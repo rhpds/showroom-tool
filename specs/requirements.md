@@ -12,7 +12,7 @@ The labs and demos are made available via a Catalog called RHDP and its associat
 
 - Repo Structure is contained in `./specs/structure.md`
 - High Level Technical Architecture is contained in `./specs/architecture.md`
-- 
+
 ## Goals
 
 - Customizable summarization capabilities for lab and demo content
@@ -20,13 +20,18 @@ The labs and demos are made available via a Catalog called RHDP and its associat
 
 ## Requirements 
 
-**User Story:** As a technical end user I a well maintained Python repo which is simple to:
+**User Story:** As a technical end user and/or developer I want a well maintained Python repo which is simple to:
 
-- Clone
+- Clone the directory
 - Follow the basic README documented steps to:
   - Create the local venv via `uv` or `python3.12 -m venv`
   - Install the requirements
   - Start using, developing, or testing the `showroom-tool`
+
+**Assumptions:**
+
+- User is familiar with python and virtual environments (`venv`)
+- User already has `python3.12` or understands how to add it
 
 ### 1. Setup the repository and basic python dependencies
 
@@ -37,8 +42,5 @@ The labs and demos are made available via a Catalog called RHDP and its associat
   - `uv` used throughout
 - Create a README.md and populate
 
-### 1. Setup the repository and basic python dependencies
-
-
-**Further requirements to be added as the application progresses.**
+**Further requirements will be added as the application progresses.**
 
