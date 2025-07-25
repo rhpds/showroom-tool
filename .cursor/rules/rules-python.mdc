@@ -17,6 +17,7 @@ alwaysApply: false
 - Crete comprehensive testing with pytest.
 - Dependency management via uv and virtual environments.
 - Code style consistency using Ruff.
+- Linting via Ruff.
 - AI-friendly coding practices: descriptive names, type hints, detailed comments, and rich error context.
 
 ## Runtime Rules

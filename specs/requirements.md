@@ -6,6 +6,8 @@
 
 The tool processes content provided as one or more AsciiDoc files typically stored in remote `antora` formatted repos or local git clones
 
+The labs and demos are made available via a Catalog called RHDP and its associated repo which contains yaml defined Catalog Items (CIs). 
+
 ## External Resources
 
 - Repo Structure is contained in `./specs/structure.md`
@@ -18,6 +20,14 @@ The tool processes content provided as one or more AsciiDoc files typically stor
 
 ## Requirements 
 
+**User Story:** As a technical end user I a well maintained Python repo which is simple to:
+
+- Clone
+- Follow the basic README documented steps to:
+  - Create the local venv via `uv` or `python3.12 -m venv`
+  - Install the requirements
+  - Start using, developing, or testing the `showroom-tool`
+
 ### 1. Setup the repository and basic python dependencies
 
 - Read ALL the rules files in `.cursor/rules/` for guidelines and context
@@ -26,6 +36,8 @@ The tool processes content provided as one or more AsciiDoc files typically stor
   - `python3.12`
   - `uv` used throughout
 - Create a README.md and populate
+
+### 1. Setup the repository and basic python dependencies
 
 
 **Further requirements to be added as the application progresses.**
