@@ -2,6 +2,9 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/showroom_tool", "src/config"]
+
 [project]
 name = "showroom-tool"
 version = "0.1.0"
@@ -21,7 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Topic :: Software Development :: Tools",
+    "Topic :: Software Development",
     "Topic :: Text Processing",
     "Topic :: Documentation",
 ]
@@ -70,7 +73,7 @@ Repository = "https://github.com/redhat-demo-platform/showroom-tool"
 Issues = "https://github.com/redhat-demo-platform/showroom-tool/issues"
 
 [project.scripts]
-showroom-tool = "src.showroom_tool.main:cli"
+showroom-tool = "showroom_tool.cli:main"
 
 [tool.uv]
 dev-dependencies = [
