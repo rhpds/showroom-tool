@@ -11,6 +11,9 @@ from typing import List
 from pydantic import BaseModel, Field
 
 
+# The Showroom BaseModel is used to hold the lab and demo content from the Showroom Git Repo
+# It holds the lab_name, git_url, git_ref, and modules themselves (as raw unprocessed asciidoc)
+
 class Showroom(BaseModel):
     """Pydantic BaseModel for lab and demo content from Showroom Git repositories."""
     
