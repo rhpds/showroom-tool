@@ -112,19 +112,22 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
   - ✅ Extract `module_name` from level 1 OR level 2 headers
   - ✅ Store filename and entire file content
 
+### ✅ 4.1 Create the basic LangGraph entry point - COMPLETED
 
-
-### ✅ 4.1 Create the basic LangGraph entry point 
-
-LangGraph is great
-
-
-
-
-
-**User Story:** As the end user I want to supply the application with the git repository containing my showroom lab so it can be processed ie summarized, reviewed etc.
+**User Story:** As the developer I intend this application to, in future, make use of LangGraph's Agentic AI capabilities, so want to create a basic linear graph with one node that fetches the Showroom repositories and modules. 
 
 **✅ Implemented:**
+
+- ✅ Read the example code in `./sample-code/graph_factory.py` especially function `graph_factory`
+- ✅ Implemented LangGraph integration with:
+  - ✅ `ShowroomState` Pydantic BaseModel for LangGraph state management in `src/config/basemodels.py`
+  - ✅ `get_showroom` function encapsulating existing logic as a LangGraph node in `src/showroom_tool/graph_factory.py`
+  - ✅ `graph_factory` function creating simple `START -> get_showroom -> END` graph
+  - ✅ `process_showroom_with_graph` async function for easy graph execution
+- ✅ Updated the main CLI client to invoke the graph:
+  - ✅ Modified `src/showroom_tool/cli.py` to use async LangGraph processing
+  - ✅ Fixed `src/showroom_tool/__main__.py` to import from correct CLI module
+  - ✅ Added proper async/await support with `asyncio.run()` wrapper
 
 
 
@@ -173,6 +176,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 2.1: ShowroomModule BaseModel
 - ✅ Requirement 2.2: Codebase cleanup
 - ✅ Requirement 3.1: Showroom Fetcher
+- ✅ Requirement 4.1: Basic LangGraph Agentic AI Entry Point
 
 **Additional enhancements** implemented for superior user experience and robustness.
 

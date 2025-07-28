@@ -5,6 +5,7 @@ CLI entry point for showroom-tool that works properly when installed.
 """
 
 import argparse
+import asyncio
 import hashlib
 import re
 import shutil
@@ -564,8 +565,8 @@ def fetch_showroom_repository(
             shutil.rmtree(repo_path.parent, ignore_errors=True)
 
 
-def main():
-    """Main CLI entry point."""
+async def main_async():
+    """Main CLI entry point using LangGraph."""
     args = parse_arguments()
 
     # Determine the repository URL (from positional arg or --repo flag)
@@ -585,6 +586,7 @@ def main():
         console.print(
             f"[blue]Starting showroom-tool with repository: {repo_url}[/blue]"
         )
+        console.print("[blue]Using LangGraph processing...[/blue]")
         if args.no_cache:
             console.print("[blue]Cache disabled - will use temporary clone[/blue]")
         elif args.cache_dir:
@@ -592,13 +594,30 @@ def main():
                 f"[blue]Using custom cache directory: {args.cache_dir}[/blue]"
             )
 
-    # Fetch the showroom repository
-    showroom = fetch_showroom_repository(
-        repo_url, args.ref, args.verbose, args.cache_dir, args.no_cache
-    )
+    # Import the LangGraph function
+    from showroom_tool.graph_factory import process_showroom_with_graph
 
-    if showroom is None:
-        console.print("[red]Failed to fetch showroom repository[/red]")
+    # Process the showroom repository using LangGraph
+    try:
+        result = await process_showroom_with_graph(
+            git_url=repo_url,
+            git_ref=args.ref,
+            verbose=args.verbose,
+            cache_dir=args.cache_dir,
+            no_cache=args.no_cache
+        )
+
+        if not result.get("success", False):
+            console.print(f"[red]Failed to fetch showroom repository: {result.get('error', 'Unknown error')}[/red]")
+            sys.exit(1)
+
+        showroom = result.get("showroom_data")
+        if showroom is None:
+            console.print("[red]No showroom data returned from graph processing[/red]")
+            sys.exit(1)
+
+    except Exception as e:
+        console.print(f"[red]Error during graph processing: {e}[/red]")
         sys.exit(1)
 
     # For now, just display the results
@@ -653,7 +672,12 @@ def main():
             console.print(module_line)
 
     if args.verbose:
-        console.print("\n[blue]Showroom data model successfully populated[/blue]")
+        console.print("\n[blue]Showroom data model successfully populated via LangGraph[/blue]")
+
+
+def main():
+    """Synchronous wrapper for the async main function."""
+    asyncio.run(main_async())
 
 
 if __name__ == "__main__":
