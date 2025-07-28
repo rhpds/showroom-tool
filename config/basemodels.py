@@ -7,16 +7,26 @@ This module contains all Pydantic BaseModels used throughout the application
 for data validation and settings management.
 """
 
-from typing import List
+
 from pydantic import BaseModel, Field
 
 
-# The Showroom BaseModel is used to hold the lab and demo content from the Showroom Git Repo
-# It holds the lab_name, git_url, git_ref, and modules themselves (as raw unprocessed asciidoc)
+class ShowroomModule(BaseModel):
+    """Pydantic BaseModel for individual lab modules within a Showroom."""
+
+    module_name: str = Field(
+        ...,
+        description="The name of the lab module extracted from its level 1 header ie `^= My module name`"
+    )
+    module_content: str = Field(
+        ...,
+        description="The raw unprocessed asciidoc content of the module"
+    )
+
 
 class Showroom(BaseModel):
     """Pydantic BaseModel for lab and demo content from Showroom Git repositories."""
-    
+
     lab_name: str = Field(
         ...,
         description="The name of the lab extracted from the Showroom Git Repo"
@@ -29,7 +39,7 @@ class Showroom(BaseModel):
         default="main",
         description="The git tag or branch to use, defaults to main"
     )
-    modules: List[str] = Field(
+    modules: list[ShowroomModule] = Field(
         ...,
-        description="Array containing the raw asciidoc modules in sequence"
-    ) 
+        description="The Showroom Lab modules"
+    )

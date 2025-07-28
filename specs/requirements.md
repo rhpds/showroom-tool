@@ -74,6 +74,17 @@ module_content: str, decription="The raw unprocessed asciidoc content of the mod
 modules: array of type ShowroomModule, description="The Showroom Lab modules"
 ```
 
+### 2.2 Clean up codebase
+
+**User Story:** As the developer I want to ensure the existing code is clean and lints perfectly before moving on
+
+**Implement:**
+
+- Run `ruff` over the existing codebase
+  - ignore the `sample-code` directory
+- Consider each error and warning and fix where appropriately
+- Re-run `ruff` to ensure clean codebase
+
 ### 3. Create the Showroom Fetcher
 
 **User Story:** As the end user I want to supply the application with the git repository containing my showroom lab so it can be processed ie summarized, reviewed etc.
