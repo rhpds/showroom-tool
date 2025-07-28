@@ -112,6 +112,22 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
   - ✅ Extract `module_name` from level 1 OR level 2 headers
   - ✅ Store filename and entire file content
 
+
+
+### ✅ 4.1 Create the basic LangGraph entry point 
+
+LangGraph is great
+
+
+
+
+
+**User Story:** As the end user I want to supply the application with the git repository containing my showroom lab so it can be processed ie summarized, reviewed etc.
+
+**✅ Implemented:**
+
+
+
 ## ✅ Additional Enhancements Implemented
 
 Beyond the original requirements, the following enhancements were added during development:
