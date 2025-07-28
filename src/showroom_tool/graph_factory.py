@@ -12,7 +12,7 @@ from typing import Any
 from langgraph.graph import END, StateGraph
 
 from config.basemodels import ShowroomState
-from showroom_tool.cli import fetch_showroom_repository
+from showroom_tool.showroom import fetch_showroom_repository
 
 
 async def get_showroom(state: ShowroomState) -> dict[str, Any]:

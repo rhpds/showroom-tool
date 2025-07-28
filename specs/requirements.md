@@ -130,6 +130,27 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
   - ✅ Added proper async/await support with `asyncio.run()` wrapper
 
 
+### ✅ 5.1 Refactor and fix regressions - COMPLETED
+
+**User Story:** As the developer I want this application to be easy to maintain and to be well structured, some key files are bloated ie `cli.py` 
+
+**✅ Implemented:**
+
+- ✅ Fixed regression where the summary line output for each module no longer lists the module filename - now shows filename in both normal and verbose modes
+- ✅ Refactored `cli.py` - dramatically reduced from 684 lines to 183 lines (73% reduction)
+  - ✅ Moved all cache functions to `src/showroom_tool/showroom.py` library:
+    - `get_cache_directory`, `generate_cache_key`, `is_cached_repo_current`, `update_cached_repo`
+  - ✅ Moved all showroom processing functions to `src/showroom_tool/showroom.py`:
+    - `get_or_clone_repository`, `extract_lab_info_from_site_yaml`, `parse_navigation_file`
+    - `extract_module_name_from_content`, `read_module_content`, `fetch_showroom_repository`
+    - `count_words_and_lines`
+  - ✅ Updated CLI to import functions from new showroom library
+  - ✅ Updated LangGraph integration to use new showroom library
+  - ✅ All components tested and working correctly
+  - ✅ Clean separation of concerns: CLI handles UI/arguments, showroom.py handles business logic
+  
+
+
 
 ## ✅ Additional Enhancements Implemented
 
@@ -177,6 +198,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 2.2: Codebase cleanup
 - ✅ Requirement 3.1: Showroom Fetcher
 - ✅ Requirement 4.1: Basic LangGraph Agentic AI Entry Point
+- ✅ Requirement 5.1: Refactor and fix regressions
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
