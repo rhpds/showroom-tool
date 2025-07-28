@@ -150,6 +150,27 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
   - ✅ Clean separation of concerns: CLI handles UI/arguments, showroom.py handles business logic
   
 
+### ✅ 6.1 Add the AI based Showroom Summarizer prompt builder - COMPLETED
+
+**User Story:** As a user, I want to be able to use an LLM to perform Various summarization tasks on the showroom such as generating a 506 line summary as to the actual lab itself.
+
+**✅ Implemented:**
+
+- ✅ Read and understood the patterns in the prompt building code in `./sample-code/shared_utilities.py`  
+  - ✅ Analyzed how `build_enhanced_system_prompt` builds prompts from Pydantic BaseModels
+  - ✅ Understood field description extraction and behavioral directive patterns
+- ✅ Implemented comprehensive prompt building capability:
+  - ✅ Created `SHOWROOM_SUMMARY_BASE_PROMPT` with expert technical content analysis instructions
+  - ✅ Built `src/showroom_tool/prompts.py` library with full prompt building utilities:
+    - `extract_field_descriptions()` - Extracts Pydantic field descriptions with behavioral boundaries
+    - `build_showroom_summary_prompt()` - Builds enhanced system prompts from Showroom model
+    - `format_showroom_content_for_prompt()` - Formats lab content for LLM analysis
+    - `build_complete_showroom_analysis_prompt()` - Complete prompt generation pipeline
+- ✅ Created `--output-summary-prompt` CLI argument with rich formatted output:
+  - ✅ Displays complete system prompt with field-specific instructions
+  - ✅ Shows formatted user content with lab data structure
+  - ✅ Provides prompt size metrics and truncation for large content
+  - ✅ Beautiful console output with Rich formatting and clear sections   
 
 
 ## ✅ Additional Enhancements Implemented
@@ -199,6 +220,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 3.1: Showroom Fetcher
 - ✅ Requirement 4.1: Basic LangGraph Agentic AI Entry Point
 - ✅ Requirement 5.1: Refactor and fix regressions
+- ✅ Requirement 6.1: AI-based Showroom Summarizer prompt builder
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
