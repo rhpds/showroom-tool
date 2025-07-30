@@ -43,6 +43,43 @@ CRITICAL INSTRUCTIONS:
 Be precise, accurate, and focus only on information that is clearly stated or directly demonstrated in the lab content."""
 
 
+# Base prompt for Showroom lab review
+SHOWROOM_REVIEW_BASE_PROMPT = """You are an expert technical content reviewer specializing in evaluating hands-on laboratory exercises and demo content. Your role is to provide constructive, detailed feedback on Showroom lab repositories across multiple quality dimensions.
+
+Your review should focus on:
+- Completeness: Assess if the content covers all necessary topics and provides complete learning experiences
+- Clarity: Evaluate how clear and understandable the instructions, explanations, and objectives are
+- Technical Detail: Analyze the depth and accuracy of technical information provided
+- Usefulness: Determine practical value for the target audience and real-world applicability
+- Business Value: Assess how well the content demonstrates business benefits and ROI
+
+Provide balanced, constructive feedback that helps content creators improve their labs. Focus on specific, actionable suggestions and maintain a professional, helpful tone throughout your review."""
+
+
+# Specialized prompt for ShowroomReview generation
+SHOWROOM_REVIEW_STRUCTURED_PROMPT = """You are an expert technical content reviewer specializing in evaluating Red Hat hands-on laboratory exercises and demo content. Your role is to provide constructive, detailed feedback on Showroom lab repositories across multiple quality dimensions.
+
+REVIEW FOCUS:
+- Completeness: Assess if the content covers all necessary topics and provides complete learning experiences
+- Clarity: Evaluate how clear and understandable the instructions, explanations, and objectives are
+- Technical Detail: Analyze the depth and accuracy of technical information provided
+- Usefulness: Determine practical value for the target audience and real-world applicability
+- Business Value: Assess how well the content demonstrates business benefits and ROI
+
+SCORING GUIDELINES:
+- Use a 0-10 scale where 10 is exceptional, 7-8 is good, 5-6 is adequate, 3-4 needs improvement, 0-2 is poor
+- Provide specific, actionable feedback for each dimension
+- Focus on constructive suggestions for improvement
+- Consider the target audience when evaluating appropriateness
+
+CRITICAL INSTRUCTIONS:
+- Be fair and balanced in your assessment
+- Provide specific examples when giving feedback
+- Consider both strengths and areas for improvement
+- Ensure feedback is actionable and helpful for content creators
+- Maintain professional, constructive tone throughout"""
+
+
 def extract_field_descriptions(model_class: type[BaseModel]) -> str:
     """
     Extract field descriptions from a Pydantic model and format them with behavioral directives.
@@ -223,6 +260,59 @@ def build_showroom_summary_generation_prompt(
     """
     system_prompt = build_showroom_summary_structured_prompt(
         summary_model, include_field_instructions
+    )
+
+    user_content = format_showroom_content_for_prompt(showroom_data)
+
+    return system_prompt, user_content
+
+
+def build_showroom_review_structured_prompt(
+    review_model: type[BaseModel],
+    include_field_instructions: bool = True
+) -> str:
+    """
+    Build a structured prompt specifically for ShowroomReview generation.
+
+    Args:
+        review_model: The ShowroomReview Pydantic model class
+        include_field_instructions: Whether to include field-specific instructions
+
+    Returns:
+        Complete system prompt for structured review generation
+    """
+    base_prompt = SHOWROOM_REVIEW_STRUCTURED_PROMPT
+
+    if include_field_instructions:
+        field_instructions = extract_field_descriptions(review_model)
+        if field_instructions:
+            enhanced_prompt = f"{base_prompt}\n\n{field_instructions}"
+        else:
+            enhanced_prompt = base_prompt
+    else:
+        enhanced_prompt = base_prompt
+
+    return enhanced_prompt
+
+
+def build_showroom_review_generation_prompt(
+    showroom_data,
+    review_model: type[BaseModel],
+    include_field_instructions: bool = True
+) -> tuple[str, str]:
+    """
+    Build complete system and user prompts for ShowroomReview generation.
+
+    Args:
+        showroom_data: Showroom BaseModel instance with the lab data
+        review_model: The ShowroomReview Pydantic model class
+        include_field_instructions: Whether to include field-specific instructions
+
+    Returns:
+        Tuple of (system_prompt, user_content) ready for LLM review generation
+    """
+    system_prompt = build_showroom_review_structured_prompt(
+        review_model, include_field_instructions
     )
 
     user_content = format_showroom_content_for_prompt(showroom_data)

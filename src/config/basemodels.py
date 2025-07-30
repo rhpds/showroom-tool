@@ -49,6 +49,65 @@ class ShowroomSummary(BaseModel):
     )
 
 
+class ShowroomReview(BaseModel):
+    """Pydantic BaseModel for AI-generated Showroom lab reviews."""
+
+    completeness: float = Field(
+        ...,
+        ge=0,
+        le=10,
+        description="Score for completeness of content"
+    )
+    completeness_feedback: str = Field(
+        ...,
+        description="Constructive feedback regarding completeness of content"
+    )
+    clarity: float = Field(
+        ...,
+        ge=0,
+        le=10,
+        description="Score for clarity of instructions"
+    )
+    clarity_feedback: str = Field(
+        ...,
+        description="Constructive feedback regarding clarity of content"
+    )
+    technical_detail: float = Field(
+        ...,
+        ge=0,
+        le=10,
+        description="Score for technical detail"
+    )
+    technical_detail_feedback: str = Field(
+        ...,
+        description="Constructive feedback regarding technical details of content"
+    )
+    usefulness: float = Field(
+        ...,
+        ge=0,
+        le=10,
+        description="Score for usefulness to target audience"
+    )
+    usefulness_feedback: str = Field(
+        ...,
+        description="Constructive feedback regarding usefulness of content"
+    )
+    business_value: float = Field(
+        ...,
+        ge=0,
+        le=10,
+        description="Score for business value of content"
+    )
+    business_value_feedback: str = Field(
+        ...,
+        description="Constructive feedback regarding business value of content"
+    )
+    review_summary: str = Field(
+        ...,
+        description="3-4 sentence overall review summary"
+    )
+
+
 class Showroom(BaseModel):
     """Pydantic BaseModel for lab and demo content from Showroom Git repositories."""
 
@@ -62,6 +121,9 @@ class Showroom(BaseModel):
     modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules")
     summary_output: ShowroomSummary | None = Field(
         default=None, description="AI-generated summary of the lab content"
+    )
+    review_output: ShowroomReview | None = Field(
+        default=None, description="AI-generated review of the lab content"
     )
 
 

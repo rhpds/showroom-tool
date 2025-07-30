@@ -209,9 +209,9 @@ lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary 
   - Any function that is not necessary except those needed to generate the system prompt
 
 
-### 7
+### 7 Enable the content to be passed to an LLM
 
-**User Story:** User needs to now pass the showroom content to a LLM with the system prompt to get the LLM feedback in s structured format
+**User Story:** User needs to now pass the showroom content to a LLM with the system prompt to get the LLM feedback in a structured format
 
 **Tasks:**
 
@@ -310,6 +310,44 @@ Total Modules: 9
 ============================================================
 ```
 
+### ✅ 8 Add a Review capability - COMPLETED
+
+**User Story:** User is very happy with the existing `summary` capability and wants a similar `review` capability focussed more on reviewing the content. For consistency they want it to work in the same way as summary with the same command line options 
+
+**✅ Implemented:**
+
+- ✅ Created the ShowroomReview BaseModel in `./src/config/basemodels.py` with scoring fields:
+```python
+completeness: float = Field(..., ge=0, le=10, description="Score for completeness of content")
+completeness_feedback: str = Field(..., description="Constructive feedback regarding completeness of content")
+clarity: float = Field(..., ge=0, le=10, description="Score for clarity of instructions")
+clarity_feedback: str = Field(..., description="Constructive feedback regarding clarity of content")
+technical_detail: float = Field(..., ge=0, le=10, description="Score for technical detail")
+technical_detail_feedback: str = Field(..., description="Constructive feedback regarding technical details of content")
+usefulness: float = Field(..., ge=0, le=10, description="Score for usefulness to target audience")
+usefulness_feedback: str = Field(..., description="Constructive feedback regarding usefulness of content")
+business_value: float = Field(..., ge=0, le=10, description="Score for business value of content")
+business_value_feedback: str = Field(..., description="Constructive feedback regarding business value of content")
+review_summary: str = Field(..., description="3-4 sentence overall review summary")
+```
+- ✅ Added `review_output: ShowroomReview | None` field to Showroom BaseModel for AI-generated reviews
+- ✅ Extended `shared_utilities.py` with review-specific functions following summary patterns:
+  - ✅ `save_review_to_workspace()` - saves review outputs to workspace
+  - ✅ `build_showroom_review_prompt()` - builds complete review system prompts
+- ✅ Extended `prompts.py` with review-specific prompt functions:
+  - ✅ `SHOWROOM_REVIEW_BASE_PROMPT` and `SHOWROOM_REVIEW_STRUCTURED_PROMPT` constants
+  - ✅ `build_showroom_review_structured_prompt()` - builds structured review prompts
+  - ✅ `build_showroom_review_generation_prompt()` - complete review prompt pipeline
+- ✅ Added `review` command to CLI with identical functionality to summary:
+  - ✅ Same command line options: `--repo`, `--ref`, `--verbose`, `--output`, `--llm-provider`, etc.
+  - ✅ Support for both verbose and JSON output modes
+  - ✅ Detailed showroom display in verbose mode
+  - ✅ AI-powered review generation with structured scoring and feedback
+  - ✅ Workspace saving functionality
+- ✅ Complete LLM integration ready for production use
+
+
+
 ## ✅ Additional Enhancements Implemented
 
 Beyond the original requirements, the following enhancements were added during development:
@@ -364,6 +402,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 7.1: Clean JSON output for automation and piping
 - ✅ Requirement 7.2: Enhanced verbose output with detailed lab and module information
 - ✅ Requirement 7.3: Consistent verbose output format for fetch command
+- ✅ Requirement 8: AI-powered review capability with structured scoring and feedback
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
@@ -386,12 +425,18 @@ showroom-tool fetch --repo https://github.com/example/my-showroom --ref develop 
 # AI-powered summary generation
 showroom-tool summary https://github.com/example/my-showroom
 
+# AI-powered review generation with detailed scoring and feedback
+showroom-tool review https://github.com/example/my-showroom
+
 # Clean JSON output for automation/piping
 showroom-tool summary https://github.com/example/my-showroom --output json | jq
 showroom-tool summary https://github.com/example/my-showroom --output json > summary.json
+showroom-tool review https://github.com/example/my-showroom --output json | jq
+showroom-tool review https://github.com/example/my-showroom --output json > review.json
 
 # With LLM options
 showroom-tool summary https://github.com/example/my-showroom --llm-provider gemini --temperature 0.2
+showroom-tool review https://github.com/example/my-showroom --llm-provider openai --temperature 0.1
 
 # Display AI prompt template
 showroom-tool prompt
@@ -400,6 +445,7 @@ showroom-tool prompt
 showroom-tool --help
 showroom-tool fetch --help
 showroom-tool summary --help
+showroom-tool review --help
 ```
 
 **Production Ready**: Complete LLM integration with structured output, automation support, and professional CLI experience.

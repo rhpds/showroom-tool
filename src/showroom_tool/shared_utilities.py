@@ -16,7 +16,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from src.config.basemodels import ShowroomSummary
+from src.config.basemodels import ShowroomReview, ShowroomSummary
 
 # Optional OpenAI imports for LLM functionality
 try:
@@ -474,6 +474,82 @@ Be precise, accurate, and focus only on information that is clearly stated or di
     # Build enhanced system prompt
     system_prompt = build_enhanced_system_prompt(
         base_prompt, summary_model, context_hints
+    )
+    
+    # Format user content
+    user_content = format_showroom_content_for_prompt(showroom_data)
+    
+    return system_prompt, user_content
+
+
+def save_review_to_workspace(
+    review: BaseModel, save_path: str = "workspace"
+) -> str:
+    """
+    Save a review BaseModel to the workspace with model information included.
+    
+    Args:
+        review: BaseModel instance to save
+        save_path: Directory to save the file
+        
+    Returns:
+        Path to the saved file
+    """
+    # Extract content type from the review (default to "showroom")
+    content_type = "showroom_review"
+    
+    # Convert to dict for saving
+    review_dict = review.model_dump()
+    
+    # Save using the existing function
+    return save_structured_output(review_dict, content_type, save_path)
+
+
+def build_showroom_review_prompt(
+    showroom_data,
+    review_model: type[BaseModel] = ShowroomReview,
+    base_prompt: str | None = None,
+    context_hints: dict[str, Any] | None = None,
+) -> tuple[str, str]:
+    """
+    Build complete system and user prompts for Showroom review generation.
+    
+    Args:
+        showroom_data: Showroom BaseModel instance with the lab data
+        review_model: The review Pydantic model class (defaults to ShowroomReview)
+        base_prompt: Optional custom base prompt (uses default if not provided)
+        context_hints: Optional context hints to enhance the prompt
+        
+    Returns:
+        Tuple of (system_prompt, user_content) ready for LLM processing
+    """
+    # Default base prompt for showroom review
+    if base_prompt is None:
+        base_prompt = """You are an expert technical content reviewer specializing in evaluating Red Hat hands-on laboratory exercises and demo content. Your role is to provide constructive, detailed feedback on Showroom lab repositories across multiple quality dimensions.
+
+REVIEW FOCUS:
+- Completeness: Assess if the content covers all necessary topics and provides complete learning experiences
+- Clarity: Evaluate how clear and understandable the instructions, explanations, and objectives are
+- Technical Detail: Analyze the depth and accuracy of technical information provided
+- Usefulness: Determine practical value for the target audience and real-world applicability
+- Business Value: Assess how well the content demonstrates business benefits and ROI
+
+SCORING GUIDELINES:
+- Use a 0-10 scale where 10 is exceptional, 7-8 is good, 5-6 is adequate, 3-4 needs improvement, 0-2 is poor
+- Provide specific, actionable feedback for each dimension
+- Focus on constructive suggestions for improvement
+- Consider the target audience when evaluating appropriateness
+
+CRITICAL INSTRUCTIONS:
+- Be fair and balanced in your assessment
+- Provide specific examples when giving feedback
+- Consider both strengths and areas for improvement
+- Ensure feedback is actionable and helpful for content creators
+- Maintain professional, constructive tone throughout"""
+    
+    # Build enhanced system prompt
+    system_prompt = build_enhanced_system_prompt(
+        base_prompt, review_model, context_hints
     )
     
     # Format user content

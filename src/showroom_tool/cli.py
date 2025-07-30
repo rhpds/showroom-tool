@@ -13,28 +13,38 @@ from rich.console import Console
 
 # Try to import from the installed package structure
 try:
-    from config.basemodels import Showroom, ShowroomSummary
+    from config.basemodels import Showroom, ShowroomReview, ShowroomSummary
     from showroom_tool.showroom import count_words_and_lines
     from showroom_tool.shared_utilities import (
+        build_showroom_review_prompt,
         build_showroom_summary_prompt,
         process_content_with_structured_output,
         print_basemodel,
+        save_review_to_workspace,
         save_summary_to_workspace,
     )
-    from showroom_tool.prompts import build_showroom_summary_structured_prompt
+    from showroom_tool.prompts import (
+        build_showroom_review_structured_prompt,
+        build_showroom_summary_structured_prompt,
+    )
 except ImportError:
     # Fall back to adding the project root to path (for development)
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
-    from config.basemodels import Showroom, ShowroomSummary
+    from config.basemodels import Showroom, ShowroomReview, ShowroomSummary
     from showroom_tool.showroom import count_words_and_lines
     from showroom_tool.shared_utilities import (
+        build_showroom_review_prompt,
         build_showroom_summary_prompt,
         process_content_with_structured_output,
         print_basemodel,
+        save_review_to_workspace,
         save_summary_to_workspace,
     )
-    from showroom_tool.prompts import build_showroom_summary_structured_prompt
+    from showroom_tool.prompts import (
+        build_showroom_review_structured_prompt,
+        build_showroom_summary_structured_prompt,
+    )
 
 console = Console()
 
@@ -111,6 +121,11 @@ def parse_arguments() -> argparse.Namespace:
     summary_parser = subparsers.add_parser("summary", help="Generate AI-powered summary of showroom content")
     add_common_arguments(summary_parser)
     add_llm_arguments(summary_parser)
+
+    # Review command - fetch + LLM review
+    review_parser = subparsers.add_parser("review", help="Generate AI-powered review of showroom content")
+    add_common_arguments(review_parser)
+    add_llm_arguments(review_parser)
 
     # Prompt command - just show the prompt
     prompt_parser = subparsers.add_parser("prompt", help="Display the AI summary prompt template")
@@ -271,6 +286,88 @@ async def handle_summary_command(args):
             sys.exit(1)
 
 
+async def handle_review_command(args):
+    """Handle the review command to generate AI-powered review."""
+    # Determine output mode
+    is_json_output = args.output == "json"
+    
+    if not is_json_output:
+        console.print("\n[bold blue]AI Review Generation[/bold blue]")
+    
+    # Get repository data first
+    showroom = await fetch_showroom_data(args)
+    
+    # Display detailed showroom information in verbose mode
+    if not is_json_output and args.output == "verbose":
+        display_showroom_details(showroom, args)
+    
+    # Generate AI review
+    if not is_json_output:
+        console.print("\n[blue]Generating AI review...[/blue]")
+    
+    try:
+        # Build the complete prompt
+        system_prompt, user_content = build_showroom_review_prompt(showroom, ShowroomReview)
+        
+        if args.verbose and not is_json_output:
+            console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
+            console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
+        
+        # Process with LLM (disable verbose output for JSON mode)
+        review, success, metadata = await process_content_with_structured_output(
+            content=user_content,
+            model_class=ShowroomReview,
+            system_prompt=system_prompt,
+            llm_provider=args.llm_provider,
+            model=args.model,
+            temperature=args.temperature,
+            verbose=args.verbose and not is_json_output,
+        )
+        
+        if success and review:
+            if is_json_output:
+                # Clean JSON output for piping to jq
+                import json
+                print(json.dumps(review.model_dump(), indent=2, ensure_ascii=False))
+            else:
+                # Verbose console output (current behavior)
+                console.print("\n[bold green]✅ AI Review Generated Successfully![/bold green]")
+                print_basemodel(review, "Showroom Review")
+                
+                # Save to workspace
+                saved_path = save_review_to_workspace(review)
+                console.print(f"\n[blue]💾 Review saved to: {saved_path}[/blue]")
+            
+            # Update the showroom object with the review
+            showroom.review_output = review
+            
+        else:
+            if is_json_output:
+                # For JSON output, print error to stderr and exit
+                print(f"Error: {metadata.get('error', 'Failed to generate review')}", file=sys.stderr)
+                sys.exit(1)
+            else:
+                console.print("\n[red]❌ Failed to generate AI review[/red]")
+                if metadata.get("error"):
+                    console.print(f"[red]Error: {metadata['error']}[/red]")
+                sys.exit(1)
+            
+    except Exception as e:
+        if is_json_output:
+            # For JSON output, print error to stderr and exit
+            print(f"Error: {str(e)}", file=sys.stderr)
+            if args.verbose:
+                import traceback
+                print(traceback.format_exc(), file=sys.stderr)
+            sys.exit(1)
+        else:
+            console.print(f"[red]Error during AI processing: {e}[/red]")
+            if args.verbose:
+                import traceback
+                console.print(f"[red]{traceback.format_exc()}[/red]")
+            sys.exit(1)
+
+
 async def fetch_showroom_data(args):
     """Fetch showroom data using LangGraph."""
     # Determine output mode
@@ -390,6 +487,8 @@ async def main_async():
         await handle_prompt_command()
     elif args.command == "summary":
         await handle_summary_command(args)
+    elif args.command == "review":
+        await handle_review_command(args)
     elif args.command == "fetch" or args.command is None:
         # Default behavior for backward compatibility
         await handle_fetch_command(args)
