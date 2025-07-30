@@ -266,7 +266,8 @@ def get_or_clone_repository(
                 try:
                     repo.git.checkout(git_ref)
                 except git.GitCommandError as e:
-                    console.print(f"[red]Error checking out ref '{git_ref}': {e}[/red]")
+                    if verbose:
+                        console.print(f"[red]Error checking out ref '{git_ref}': {e}[/red]")
                     return None
 
             progress.update(task, description="Repository cloned successfully")
@@ -277,7 +278,8 @@ def get_or_clone_repository(
         return repo_path
 
     except git.GitCommandError as e:
-        console.print(f"[red]Git error: {e}[/red]")
+        if verbose:
+            console.print(f"[red]Git error: {e}[/red]")
         return None
 
 
@@ -377,14 +379,15 @@ def extract_module_name_from_content(content: str) -> str:
     return ""
 
 
-def read_module_content(pages_dir: Path, filename: str) -> tuple[str, str]:
+def read_module_content(pages_dir: Path, filename: str, verbose: bool = False) -> tuple[str, str]:
     """Read module content and extract module name."""
     module_path = pages_dir / filename
 
     if not module_path.exists():
-        console.print(
-            f"[yellow]Warning: Module file not found at {module_path}[/yellow]"
-        )
+        if verbose:
+            console.print(
+                f"[yellow]Warning: Module file not found at {module_path}[/yellow]"
+            )
         return "", ""
 
     try:
@@ -395,7 +398,8 @@ def read_module_content(pages_dir: Path, filename: str) -> tuple[str, str]:
         return module_name, content
 
     except OSError as e:
-        console.print(f"[red]Error reading module file {filename}: {e}[/red]")
+        if verbose:
+            console.print(f"[red]Error reading module file {filename}: {e}[/red]")
         return "", ""
 
 
@@ -453,7 +457,7 @@ def fetch_showroom_repository(
         modules = []
 
         for filename in module_files:
-            module_name, module_content = read_module_content(pages_dir, filename)
+            module_name, module_content = read_module_content(pages_dir, filename, verbose)
 
             if module_content:  # Only add if we successfully read content
                 # Use site title for start page if no module title was extracted
@@ -484,13 +488,15 @@ def fetch_showroom_repository(
             lab_name=lab_name, git_url=git_url, git_ref=git_ref, modules=modules
         )
 
-        console.print(
-            f"[green]Successfully fetched showroom lab: '{lab_name}' with {len(modules)} modules[/green]"
-        )
+        if verbose:
+            console.print(
+                f"[green]Successfully fetched showroom lab: '{lab_name}' with {len(modules)} modules[/green]"
+            )
         return showroom
 
     except Exception as e:
-        console.print(f"[red]Unexpected error: {e}[/red]")
+        if verbose:
+            console.print(f"[red]Unexpected error: {e}[/red]")
         return None
     finally:
         # Clean up temporary directory if caching was disabled

@@ -111,6 +111,12 @@ def add_llm_arguments(parser):
         default=None,
         help="Temperature for LLM generation (default: 0.1)",
     )
+    parser.add_argument(
+        "--output",
+        default="verbose",
+        choices=["verbose", "json"],
+        help="Output format: 'verbose' for rich console output (default), 'json' for clean JSON output",
+    )
 
 
 async def handle_prompt_command():
@@ -132,23 +138,28 @@ async def handle_prompt_command():
 
 async def handle_summary_command(args):
     """Handle the summary command to generate AI-powered summary."""
-    console.print("\n[bold blue]AI Summary Generation[/bold blue]")
+    # Determine output mode
+    is_json_output = args.output == "json"
+    
+    if not is_json_output:
+        console.print("\n[bold blue]AI Summary Generation[/bold blue]")
     
     # Get repository data first
     showroom = await fetch_showroom_data(args)
     
     # Generate AI summary
-    console.print("\n[blue]Generating AI summary...[/blue]")
+    if not is_json_output:
+        console.print("\n[blue]Generating AI summary...[/blue]")
     
     try:
         # Build the complete prompt
         system_prompt, user_content = build_showroom_summary_prompt(showroom, ShowroomSummary)
         
-        if args.verbose:
+        if args.verbose and not is_json_output:
             console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
             console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
         
-        # Process with LLM
+        # Process with LLM (disable verbose output for JSON mode)
         summary, success, metadata = await process_content_with_structured_output(
             content=user_content,
             model_class=ShowroomSummary,
@@ -156,45 +167,71 @@ async def handle_summary_command(args):
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
-            verbose=args.verbose,
+            verbose=args.verbose and not is_json_output,
         )
         
         if success and summary:
-            console.print("\n[bold green]✅ AI Summary Generated Successfully![/bold green]")
-            print_basemodel(summary, "Showroom Summary")
-            
-            # Save to workspace
-            saved_path = save_summary_to_workspace(summary)
-            console.print(f"\n[blue]💾 Summary saved to: {saved_path}[/blue]")
+            if is_json_output:
+                # Clean JSON output for piping to jq
+                import json
+                print(json.dumps(summary.model_dump(), indent=2, ensure_ascii=False))
+            else:
+                # Verbose console output (current behavior)
+                console.print("\n[bold green]✅ AI Summary Generated Successfully![/bold green]")
+                print_basemodel(summary, "Showroom Summary")
+                
+                # Save to workspace
+                saved_path = save_summary_to_workspace(summary)
+                console.print(f"\n[blue]💾 Summary saved to: {saved_path}[/blue]")
             
             # Update the showroom object with the summary
             showroom.summary_output = summary
             
         else:
-            console.print("\n[red]❌ Failed to generate AI summary[/red]")
-            if metadata.get("error"):
-                console.print(f"[red]Error: {metadata['error']}[/red]")
-            sys.exit(1)
+            if is_json_output:
+                # For JSON output, print error to stderr and exit
+                print(f"Error: {metadata.get('error', 'Failed to generate summary')}", file=sys.stderr)
+                sys.exit(1)
+            else:
+                console.print("\n[red]❌ Failed to generate AI summary[/red]")
+                if metadata.get("error"):
+                    console.print(f"[red]Error: {metadata['error']}[/red]")
+                sys.exit(1)
             
     except Exception as e:
-        console.print(f"[red]Error during AI processing: {e}[/red]")
-        if args.verbose:
-            import traceback
-            console.print(f"[red]{traceback.format_exc()}[/red]")
-        sys.exit(1)
+        if is_json_output:
+            # For JSON output, print error to stderr and exit
+            print(f"Error: {str(e)}", file=sys.stderr)
+            if args.verbose:
+                import traceback
+                print(traceback.format_exc(), file=sys.stderr)
+            sys.exit(1)
+        else:
+            console.print(f"[red]Error during AI processing: {e}[/red]")
+            if args.verbose:
+                import traceback
+                console.print(f"[red]{traceback.format_exc()}[/red]")
+            sys.exit(1)
 
 
 async def fetch_showroom_data(args):
     """Fetch showroom data using LangGraph."""
+    # Determine output mode
+    is_json_output = getattr(args, 'output', 'verbose') == "json"
+    
     # Determine the repository URL (from positional arg or --repo flag)
     repo_url = args.repo_url or args.repo
 
     if not repo_url:
-        console.print("[red]Error: Repository URL is required[/red]")
-        console.print("Usage: showroom-tool <command> <repo_url> [options]")
-        sys.exit(1)
+        if is_json_output:
+            print("Error: Repository URL is required", file=sys.stderr)
+            sys.exit(1)
+        else:
+            console.print("[red]Error: Repository URL is required[/red]")
+            console.print("Usage: showroom-tool <command> <repo_url> [options]")
+            sys.exit(1)
 
-    if args.verbose:
+    if args.verbose and not is_json_output:
         console.print(f"[blue]Processing repository: {repo_url}[/blue]")
         console.print("[blue]Using LangGraph processing...[/blue]")
 
@@ -202,27 +239,40 @@ async def fetch_showroom_data(args):
     from showroom_tool.graph_factory import process_showroom_with_graph
 
     try:
+        # For JSON output, suppress verbose output from LangGraph
         result = await process_showroom_with_graph(
             git_url=repo_url,
             git_ref=args.ref,
-            verbose=args.verbose,
+            verbose=args.verbose and not is_json_output,
             cache_dir=args.cache_dir,
             no_cache=args.no_cache
         )
 
         if not result.get("success", False):
-            console.print(f"[red]Failed to fetch showroom repository: {result.get('error', 'Unknown error')}[/red]")
+            error_msg = f"Failed to fetch showroom repository: {result.get('error', 'Unknown error')}"
+            if is_json_output:
+                print(error_msg, file=sys.stderr)
+            else:
+                console.print(f"[red]{error_msg}[/red]")
             sys.exit(1)
 
         showroom = result.get("showroom_data")
         if showroom is None:
-            console.print("[red]No showroom data returned from graph processing[/red]")
+            error_msg = "No showroom data returned from graph processing"
+            if is_json_output:
+                print(error_msg, file=sys.stderr)
+            else:
+                console.print(f"[red]{error_msg}[/red]")
             sys.exit(1)
 
         return showroom
 
     except Exception as e:
-        console.print(f"[red]Error during repository processing: {e}[/red]")
+        error_msg = f"Error during repository processing: {e}"
+        if is_json_output:
+            print(error_msg, file=sys.stderr)
+        else:
+            console.print(f"[red]{error_msg}[/red]")
         sys.exit(1)
 
 

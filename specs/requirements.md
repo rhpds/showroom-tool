@@ -228,6 +228,19 @@ lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary 
 - Add `summary` verb so the following command will work
   - `uv run showroom-tool summary https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git`
 
+### ✅ 7.1 - COMPLETED
+
+**User Story:** User needs a clean JSON output from summary to redirect to file, pipe to commands such as `jq`, or send to another tool
+
+**✅ Implemented:**
+
+- ✅ Added `--output` flag with two modes:
+  - `--output verbose` (default) - rich console output with colors, progress indicators, and saved file notifications
+  - `--output json` - clean JSON output suitable for piping to `jq` or other tools
+- ✅ JSON mode suppresses all console output and sends errors to stderr
+- ✅ Verbose mode maintains existing rich user experience
+- ✅ Perfect for automation and shell scripting workflows  
+
 
 ## ✅ Additional Enhancements Implemented
 
@@ -278,6 +291,9 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 5.1: Refactor and fix regressions
 - ✅ Requirement 6.1: AI-based Showroom Summarizer prompt builder
 - ✅ Requirement 6.2: Showroom Summarizer BaseModel
+- ✅ Requirement 6.3: Shared utilities library for system prompt generation
+- ✅ Requirement 7: Complete LLM integration with summary command
+- ✅ Requirement 7.1: Clean JSON output for automation and piping
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
@@ -292,8 +308,22 @@ showroom-tool https://github.com/example/my-showroom
 # With specific branch and verbose output  
 showroom-tool --repo https://github.com/example/my-showroom --ref develop --verbose
 
+# AI-powered summary generation
+showroom-tool summary https://github.com/example/my-showroom
+
+# Clean JSON output for automation/piping
+showroom-tool summary https://github.com/example/my-showroom --output json | jq
+showroom-tool summary https://github.com/example/my-showroom --output json > summary.json
+
+# With LLM options
+showroom-tool summary https://github.com/example/my-showroom --llm-provider gemini --temperature 0.2
+
+# Display AI prompt template
+showroom-tool prompt
+
 # Help
 showroom-tool --help
+showroom-tool summary --help
 ```
 
-**Ready for next phase**: Summarization and review capabilities using the robust ShowroomModule data structure.
+**Production Ready**: Complete LLM integration with structured output, automation support, and professional CLI experience.
