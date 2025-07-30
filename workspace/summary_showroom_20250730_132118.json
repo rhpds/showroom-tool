@@ -1,0 +1,24 @@
+{
+  "redhat_products": [
+    "Red Hat Enterprise Linux (RHEL)",
+    "Red Hat OpenShift",
+    "Red Hat OpenShift AI",
+    "RHEL AI"
+  ],
+  "lab_audience": [
+    "Developers",
+    "Cloud Operations Engineers",
+    "AI Application Developers",
+    "Operations Professionals",
+    "Those new to AI and Python"
+  ],
+  "lab_learning_objectives": [
+    "Understand the basics of using Python for AI tasks.",
+    "Define and explain Agentic AI and its benefits for operational tasks.",
+    "Identify and utilize key capabilities of AI Agents, including planning, reasoning, memory, and tool use.",
+    "Implement Chain of Thought (CoT) and ReAct prompting techniques for LLMs.",
+    "Enable AI Agents with tools (function calling) to interact with external systems.",
+    "Discuss considerations for deploying Agentic AI applications in production environments like OpenShift."
+  ],
+  "lab_summary": "This lab provides a hands-on introduction to Agentic AI and its application in cloud operations. Participants will learn how to use Python to interact with Large Language Models (LLMs) and build AI Agents capable of automating complex tasks. The lab covers key concepts such as Chain of Thought (CoT) and ReAct prompting, tool calling, and agent architecture. Participants will explore how to enable agents with tools to interact with external systems and perform actions. The lab also discusses the transition of AI Agent applications from development to production, highlighting considerations for deploying on platforms like OpenShift. The exercises are performed within a JupyterLab environment, using `ollama` as a runtime for the LLM."
+}

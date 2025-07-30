@@ -258,6 +258,54 @@ lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary 
   - ✅ Beautiful console formatting with emojis and colors
   - ✅ Only displays in verbose mode, hidden in JSON mode
 
+### ✅ 7.2 Add more detail to `--output verbose` - COMPLETED
+
+**User Story:** User wants a clear understanding of the lab and modules including name, word and line count from the showroom loading stage
+
+**✅ Implemented:**
+
+### 7.3 Reuse the `--output verbose` option with `showroom-tool fetch`
+
+**User Story:** User wants consistent outputs for similar operations
+
+**Tasks:**
+
+- Ensure the output of `showroom-tool fetch` matches the initial output of `showroom-tool ... --output verbose` 
+<EXAMPLE>
+```txt
+📚 Showroom Lab Details
+============================================================
+Lab Name: Experience Red Hat OpenShift Virtualization
+Git Repository: https://github.com/rhpds/openshift-virt-roadshow-cnv-multi-user
+Git Reference: main
+Total Modules: 9
+
+📖 Module Breakdown
+------------------------------------------------------------
+   1. Welcome to {lab_name}!
+      File: index.adoc | 1,342 words | 77 lines
+   2. Virtual Machine Management
+      File: module-01-intro.adoc | 2,784 words | 185 lines
+   3. Migrating Existing Virtual Machines
+      File: module-02-mtv.adoc | 2,465 words | 184 lines
+   4. Storage Management
+      File: module-04-storage.adoc | 1,545 words | 117 lines
+   5. Backup and Recovery for Virtual Machines
+      File: module-05-bcdr.adoc | 1,054 words | 129 lines
+   6. Template and InstanceType Management
+      File: module-07-tempinst.adoc | 2,679 words | 346 lines
+   7. Working with Virtual Machines and Applications
+      File: module-08-workingvms.adoc | 1,190 words | 118 lines
+   8. Network Management for Virtual Machines
+      File: module-09-networking.adoc | 2,220 words | 223 lines
+   9. Key Takeaways
+      File: conclusion.adoc | 503 words | 34 lines
+------------------------------------------------------------
+📊 Totals: 15,782 words | 1,413 lines across 9 modules
+============================================================
+```
+</EXAMPLE>
+
 ## ✅ Additional Enhancements Implemented
 
 Beyond the original requirements, the following enhancements were added during development:

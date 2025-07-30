@@ -1,0 +1,18 @@
+{
+  "redhat_products": [],
+  "lab_audience": [
+    "Developers interested in AI applications",
+    "Individuals with general development or scripting experience (e.g., Bash, Ansible)",
+    "Those looking to understand and implement AI-powered tools in IT operations",
+    "Anyone seeking a practical introduction to Llama Stack without deep AI or Python expertise"
+  ],
+  "lab_learning_objectives": [
+    "Understand the core idea of an AI stack like Llama Stack and its architectural pattern.",
+    "Gain hands-on experience with practical application development using the Llama Stack framework.",
+    "Explore LLM providers and Llama Stack's ability to integrate with multiple providers.",
+    "Learn about Retrieval Augmented Generation (RAG) and how Llama Stack facilitates this architecture.",
+    "Introduce AI Agents and how Llama Stack serves as a platform for building and orchestrating them.",
+    "Understand the core principles of the ReAct framework and its Reason-Act-Observe loop."
+  ],
+  "lab_summary": "This lab provides a hands-on introduction to Llama Stack, an open-source AI stack, and its application in building AI-powered tools. Participants will explore key architectural components such as LLM providers, Retrieval Augmented Generation (RAG), and AI Agents. The lab guides users through practical application development using a pre-existing code structure within the Llama Stack framework. Users will learn to set up a local LLM server using Ollama, configure a Llama Stack server instance, and perform basic chat completions. Furthermore, the lab covers integrating external services via Model Context Protocol (MCP) and building sophisticated, multi-capability AI agents. By the end of the lab, participants will understand how to combine Llama Stack components to create intelligent applications."
+}

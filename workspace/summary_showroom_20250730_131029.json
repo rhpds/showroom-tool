@@ -1,0 +1,21 @@
+{
+  "stage": true,
+  "redhat_products": [
+    "Red Hat OpenShift"
+  ],
+  "lab_audience": [
+    "Developers interested in AI applications",
+    "Individuals with general development or scripting experience (Bash, Ansible)",
+    "Those looking to apply AI to Linux and OpenShift operational skills",
+    "Those with some Python programming experience"
+  ],
+  "lab_learning_objectives": [
+    "Understand the core idea of an AI stack like Llama Stack and its architectural pattern.",
+    "Gain hands-on experience with practical application development within the Llama Stack framework.",
+    "Explore LLM Providers and Llama Stack's ability to integrate with multiple providers.",
+    "Learn about Retrieval Augmented Generation (RAG) and how Llama Stack provides components to build it into applications.",
+    "Introduce AI Agents and how Llama Stack serves as the platform for building and orchestrating them.",
+    "Understand the core principles of the ReAct framework and its Reason-Act-Observe loop."
+  ],
+  "lab_summary": "This lab provides a hands-on introduction to Llama Stack, an open-source AI stack, and its application in building AI-powered tools. Participants will explore key architectural components such as LLM providers, RAG, and AI Agents. The lab guides users through practical application development using a pre-existing code structure within the Llama Stack framework. Users will learn to set up a local LLM server using Ollama, initialize the Llama Stack server, and perform basic chat completions. The lab also covers integrating external services via MCP Servers and building sophisticated, multi-capability AI agents. By the end of the lab, participants will understand how to combine Llama Stack components to build complex, multi-functional agents."
+}

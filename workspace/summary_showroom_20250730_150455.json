@@ -1,0 +1,28 @@
+{
+  "redhat_products": [
+    "Red Hat OpenShift",
+    "Red Hat OpenShift Virtualization",
+    "Red Hat OpenShift Data Foundation",
+    "Red Hat OpenShift API for Data Protection (OADP)",
+    "Red Hat Migration Toolkit for Virtualization",
+    "Red Hat Enterprise Linux KVM hypervisor (RHEL KVM)",
+    "Red Hat OpenShift Platform Plus",
+    "Red Hat OpenShift Container Platform",
+    "Red Hat OpenShift Kubernetes Engine",
+    "Red Hat OpenShift Virtualization Engine"
+  ],
+  "lab_audience": [
+    "Virtual Machine Administrators",
+    "Virtual Infrastructure Administrators",
+    "Application Developers"
+  ],
+  "lab_learning_objectives": [
+    "Create and manage virtual machines within OpenShift Virtualization.",
+    "Migrate existing virtual machines from VMware vSphere to OpenShift Virtualization using the Migration Toolkit for Virtualization (MTV).",
+    "Manage storage for virtual machines, including creating snapshots and clones.",
+    "Implement backup and recovery strategies for virtual machines using OpenShift APIs for Data Protection (OADP).",
+    "Create and customize VM templates and InstanceTypes to streamline VM deployment.",
+    "Connect virtual machines to applications and expose them using OpenShift services and routes."
+  ],
+  "lab_summary": "This lab provides a hands-on experience with Red Hat OpenShift Virtualization, covering various aspects of virtual machine management and modernization. Participants will learn how to create, manage, and migrate VMs, as well as explore storage management, backup and recovery, and network management techniques. The lab also focuses on streamlining VM deployment through templates and instance types. Furthermore, it demonstrates how to connect VMs to applications and expose them using OpenShift services and routes. The lab utilizes tools such as the Migration Toolkit for Virtualization (MTV) and OpenShift APIs for Data Protection (OADP) to facilitate these tasks, providing a comprehensive overview of OpenShift Virtualization capabilities."
+}

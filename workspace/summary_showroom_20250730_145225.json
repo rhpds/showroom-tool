@@ -1,0 +1,30 @@
+{
+  "redhat_products": [
+    "Red Hat OpenShift",
+    "Red Hat OpenShift Virtualization",
+    "Red Hat Enterprise Linux KVM hypervisor (RHEL KVM)",
+    "Red Hat OpenShift Platform Plus",
+    "Red Hat OpenShift Container Platform",
+    "Red Hat OpenShift Kubernetes Engine",
+    "Red Hat OpenShift Virtualization Engine",
+    "Migration Toolkit for Virtualization",
+    "Red Hat OpenShift Data Foundation",
+    "Red Hat OpenShift API for Data Protection (OADP)",
+    "Migration Toolkit for Applications",
+    "Migration Toolkit for Containers"
+  ],
+  "lab_audience": [
+    "Virtual Machine Administrators",
+    "Virtual Infrastructure Administrators",
+    "Application Developers"
+  ],
+  "lab_learning_objectives": [
+    "Create and manage virtual machines within OpenShift Virtualization.",
+    "Migrate existing virtual machines from VMware vSphere to OpenShift Virtualization using the Migration Toolkit for Virtualization (MTV).",
+    "Manage storage for virtual machines, including creating snapshots and clones.",
+    "Implement backup and recovery strategies for virtual machines using OpenShift APIs for Data Protection (OADP).",
+    "Create and customize VM templates and InstanceTypes to streamline VM deployment.",
+    "Configure networking for virtual machines, including connecting to physical networks and user-defined networks (UDNs)."
+  ],
+  "lab_summary": "This lab provides a hands-on experience with Red Hat OpenShift Virtualization, covering various aspects of virtual machine management, migration, storage, backup, and networking. Participants will learn how to create, manage, and migrate VMs, as well as configure storage and networking options. The lab also explores advanced features such as automated configuration hooks and warm migration using the Migration Toolkit for Virtualization. Additionally, it demonstrates how to implement backup and recovery strategies using OpenShift APIs for Data Protection (OADP). Finally, the lab covers template and InstanceType management to streamline VM deployment and explores network management for connecting VMs to physical networks and user-defined networks."
+}

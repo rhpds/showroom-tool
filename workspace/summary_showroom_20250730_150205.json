@@ -1,0 +1,31 @@
+{
+  "redhat_products": [
+    "Red Hat OpenShift",
+    "Red Hat OpenShift Virtualization",
+    "Red Hat Enterprise Linux KVM hypervisor (RHEL KVM)",
+    "Red Hat OpenShift Platform Plus",
+    "Red Hat OpenShift Container Platform",
+    "Red Hat OpenShift Kubernetes Engine",
+    "Red Hat OpenShift Virtualization Engine",
+    "Red Hat OpenShift Data Foundation",
+    "Red Hat OpenShift API for Data Protection (OADP)",
+    "Migration Toolkit for Virtualization",
+    "Red Hat OpenShift Dev Spaces",
+    "Migration Toolkit for Applications",
+    "Migration Toolkit for Containers"
+  ],
+  "lab_audience": [
+    "Virtual Machine Administrators",
+    "Virtual Infrastructure Administrators",
+    "Application Developers"
+  ],
+  "lab_learning_objectives": [
+    "Create and manage virtual machines within OpenShift Virtualization.",
+    "Migrate existing virtual machines from VMware vSphere to OpenShift Virtualization using the Migration Toolkit for Virtualization (MTV).",
+    "Manage storage for virtual machines, including creating snapshots and cloning VMs.",
+    "Implement backup and recovery strategies for virtual machines using OpenShift APIs for Data Protection (OADP).",
+    "Create and customize VM templates and instance types to streamline VM deployment.",
+    "Connect virtual machines to both the OpenShift SDN and physical networks."
+  ],
+  "lab_summary": "This lab provides a hands-on experience with Red Hat OpenShift Virtualization, covering various aspects of virtual machine management and modernization. Participants will learn how to create, manage, and migrate VMs, as well as explore storage and networking options. The lab also covers backup and recovery strategies, template customization, and integration with OpenShift's networking capabilities. The exercises include migrating VMs from VMware vSphere, creating VM templates, and connecting VMs to physical networks. By the end of the lab, participants will have a solid understanding of how to use OpenShift Virtualization to manage virtual machines in a Kubernetes-based environment."
+}
