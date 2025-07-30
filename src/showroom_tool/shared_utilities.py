@@ -243,11 +243,7 @@ async def process_content_with_structured_output(
     
     try:
         client, model_name = initialize_llm(llm_provider, model)
-        provider = llm_provider or os.getenv("LLM_PROVIDER")
-        if not provider:
-            raise ValueError(
-                "LLM_PROVIDER must be set in environment or passed explicitly"
-            )
+        provider = llm_provider or os.getenv("LLM_PROVIDER", "gemini")
         provider = provider.lower()
         
         # Enhance system prompt with field descriptions and context hints
