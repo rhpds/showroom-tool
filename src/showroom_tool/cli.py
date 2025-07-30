@@ -13,38 +13,32 @@ from rich.console import Console
 
 # Try to import from the installed package structure
 try:
-    from config.basemodels import Showroom, ShowroomReview, ShowroomSummary
-    from showroom_tool.showroom import count_words_and_lines
+    from config.basemodels import ShowroomReview, ShowroomSummary
+    from showroom_tool.prompts import build_showroom_summary_structured_prompt
     from showroom_tool.shared_utilities import (
         build_showroom_review_prompt,
         build_showroom_summary_prompt,
-        process_content_with_structured_output,
         print_basemodel,
+        process_content_with_structured_output,
         save_review_to_workspace,
         save_summary_to_workspace,
     )
-    from showroom_tool.prompts import (
-        build_showroom_review_structured_prompt,
-        build_showroom_summary_structured_prompt,
-    )
+    from showroom_tool.showroom import count_words_and_lines
 except ImportError:
     # Fall back to adding the project root to path (for development)
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
-    from config.basemodels import Showroom, ShowroomReview, ShowroomSummary
-    from showroom_tool.showroom import count_words_and_lines
+    from config.basemodels import ShowroomReview, ShowroomSummary
+    from showroom_tool.prompts import build_showroom_summary_structured_prompt
     from showroom_tool.shared_utilities import (
         build_showroom_review_prompt,
         build_showroom_summary_prompt,
-        process_content_with_structured_output,
         print_basemodel,
+        process_content_with_structured_output,
         save_review_to_workspace,
         save_summary_to_workspace,
     )
-    from showroom_tool.prompts import (
-        build_showroom_review_structured_prompt,
-        build_showroom_summary_structured_prompt,
-    )
+    from showroom_tool.showroom import count_words_and_lines
 
 console = Console()
 
@@ -53,33 +47,33 @@ def display_showroom_details(showroom, args):
     """Display detailed showroom information in verbose mode."""
     console.print("\n[bold green]📚 Showroom Lab Details[/bold green]")
     console.print("=" * 60)
-    
+
     # Lab metadata
     console.print(f"[bold]Lab Name:[/bold] [bright_cyan]{showroom.lab_name}[/bright_cyan]")
     console.print(f"[bold]Git Repository:[/bold] [blue]{showroom.git_url}[/blue]")
     console.print(f"[bold]Git Reference:[/bold] [yellow]{showroom.git_ref}[/yellow]")
     console.print(f"[bold]Total Modules:[/bold] [bright_magenta]{len(showroom.modules)}[/bright_magenta]")
-    
+
     # Module details
-    console.print(f"\n[bold green]📖 Module Breakdown[/bold green]")
+    console.print("\n[bold green]📖 Module Breakdown[/bold green]")
     console.print("-" * 60)
-    
+
     total_words = 0
     total_lines = 0
-    
+
     for i, module in enumerate(showroom.modules, 1):
         # Get module display name
         display_name = module.module_name.strip() if module.module_name.strip() else "(no title)"
-        
+
         # Escape special characters to avoid Rich formatting conflicts
         from rich.markup import escape
         safe_display_name = escape(display_name)
-        
+
         # Count words and lines
         word_count, line_count = count_words_and_lines(module.module_content)
         total_words += word_count
         total_lines += line_count
-        
+
         # Display module info with rich formatting
         console.print(
             f"  [bright_white]{i:2d}.[/bright_white] "
@@ -90,7 +84,7 @@ def display_showroom_details(showroom, args):
             f"[dim]|[/dim] [green]{word_count:,} words[/green] "
             f"[dim]|[/dim] [blue]{line_count:,} lines[/blue]"
         )
-    
+
     # Summary totals
     console.print("-" * 60)
     console.print(
@@ -128,7 +122,7 @@ def parse_arguments() -> argparse.Namespace:
     add_llm_arguments(review_parser)
 
     # Prompt command - just show the prompt
-    prompt_parser = subparsers.add_parser("prompt", help="Display the AI summary prompt template")
+    _ = subparsers.add_parser("prompt", help="Display the AI summary prompt template")
 
     return parser.parse_args()
 
@@ -208,29 +202,29 @@ async def handle_summary_command(args):
     """Handle the summary command to generate AI-powered summary."""
     # Determine output mode
     is_json_output = args.output == "json"
-    
+
     if not is_json_output:
         console.print("\n[bold blue]AI Summary Generation[/bold blue]")
-    
+
     # Get repository data first
     showroom = await fetch_showroom_data(args)
-    
+
     # Display detailed showroom information in verbose mode
     if not is_json_output and args.output == "verbose":
         display_showroom_details(showroom, args)
-    
+
     # Generate AI summary
     if not is_json_output:
         console.print("\n[blue]Generating AI summary...[/blue]")
-    
+
     try:
         # Build the complete prompt
         system_prompt, user_content = build_showroom_summary_prompt(showroom, ShowroomSummary)
-        
+
         if args.verbose and not is_json_output:
             console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
             console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
-        
+
         # Process with LLM (disable verbose output for JSON mode)
         summary, success, metadata = await process_content_with_structured_output(
             content=user_content,
@@ -241,7 +235,7 @@ async def handle_summary_command(args):
             temperature=args.temperature,
             verbose=args.verbose and not is_json_output,
         )
-        
+
         if success and summary:
             if is_json_output:
                 # Clean JSON output for piping to jq
@@ -251,14 +245,14 @@ async def handle_summary_command(args):
                 # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Summary Generated Successfully![/bold green]")
                 print_basemodel(summary, "Showroom Summary")
-                
+
                 # Save to workspace
                 saved_path = save_summary_to_workspace(summary)
                 console.print(f"\n[blue]💾 Summary saved to: {saved_path}[/blue]")
-            
+
             # Update the showroom object with the summary
             showroom.summary_output = summary
-            
+
         else:
             if is_json_output:
                 # For JSON output, print error to stderr and exit
@@ -269,7 +263,7 @@ async def handle_summary_command(args):
                 if metadata.get("error"):
                     console.print(f"[red]Error: {metadata['error']}[/red]")
                 sys.exit(1)
-            
+
     except Exception as e:
         if is_json_output:
             # For JSON output, print error to stderr and exit
@@ -290,29 +284,29 @@ async def handle_review_command(args):
     """Handle the review command to generate AI-powered review."""
     # Determine output mode
     is_json_output = args.output == "json"
-    
+
     if not is_json_output:
         console.print("\n[bold blue]AI Review Generation[/bold blue]")
-    
+
     # Get repository data first
     showroom = await fetch_showroom_data(args)
-    
+
     # Display detailed showroom information in verbose mode
     if not is_json_output and args.output == "verbose":
         display_showroom_details(showroom, args)
-    
+
     # Generate AI review
     if not is_json_output:
         console.print("\n[blue]Generating AI review...[/blue]")
-    
+
     try:
         # Build the complete prompt
         system_prompt, user_content = build_showroom_review_prompt(showroom, ShowroomReview)
-        
+
         if args.verbose and not is_json_output:
             console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
             console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
-        
+
         # Process with LLM (disable verbose output for JSON mode)
         review, success, metadata = await process_content_with_structured_output(
             content=user_content,
@@ -323,7 +317,7 @@ async def handle_review_command(args):
             temperature=args.temperature,
             verbose=args.verbose and not is_json_output,
         )
-        
+
         if success and review:
             if is_json_output:
                 # Clean JSON output for piping to jq
@@ -333,14 +327,14 @@ async def handle_review_command(args):
                 # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Review Generated Successfully![/bold green]")
                 print_basemodel(review, "Showroom Review")
-                
+
                 # Save to workspace
                 saved_path = save_review_to_workspace(review)
                 console.print(f"\n[blue]💾 Review saved to: {saved_path}[/blue]")
-            
+
             # Update the showroom object with the review
             showroom.review_output = review
-            
+
         else:
             if is_json_output:
                 # For JSON output, print error to stderr and exit
@@ -351,7 +345,7 @@ async def handle_review_command(args):
                 if metadata.get("error"):
                     console.print(f"[red]Error: {metadata['error']}[/red]")
                 sys.exit(1)
-            
+
     except Exception as e:
         if is_json_output:
             # For JSON output, print error to stderr and exit
@@ -372,7 +366,7 @@ async def fetch_showroom_data(args):
     """Fetch showroom data using LangGraph."""
     # Determine output mode
     is_json_output = getattr(args, 'output', 'verbose') == "json"
-    
+
     # Determine the repository URL (from positional arg or --repo flag)
     repo_url = args.repo_url or args.repo
 
@@ -433,7 +427,7 @@ async def fetch_showroom_data(args):
 async def handle_fetch_command(args):
     """Handle the fetch command with detailed showroom display."""
     showroom = await fetch_showroom_data(args)
-    
+
     # Support both verbose and json output formats
     if args.output == "json":
         # Output clean JSON for automation/piping

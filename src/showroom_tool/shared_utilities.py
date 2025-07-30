@@ -35,7 +35,7 @@ def initialize_llm(
     """Initialize LLM client with provider detection. Defaults to Gemini."""
     if not OPENAI_AVAILABLE:
         raise ImportError("OpenAI package is not installed. Install it with 'pip install openai'")
-    
+
     provider = llm_provider or os.getenv("LLM_PROVIDER", "gemini")
     provider = provider.lower()
 
@@ -128,26 +128,26 @@ def build_enhanced_system_prompt(
 ) -> str:
     """
     Build an enhanced system prompt that includes field-specific descriptions and optional context hints.
-    
+
     Args:
         base_prompt: The base system prompt text
         model_class: The Pydantic model class to extract field descriptions from
         context_hints: Optional context hints to include in the prompt
-        
+
     Returns:
         Enhanced system prompt with field instructions and context hints
     """
     field_instructions = extract_field_descriptions(model_class)
-    
+
     if field_instructions:
         enhanced_prompt = f"{base_prompt}\n\n{field_instructions}"
     else:
         enhanced_prompt = base_prompt
-    
+
     if context_hints:
         context_section = "\n\nCONTEXT HINTS TO CONSIDER:\n"
         context_section += "Use these hints to improve accuracy and provide additional clarity, but do not summarize them.\n\n"
-        
+
         for key, value in context_hints.items():
             context_section += f"{key.upper()}:\n"
             if isinstance(value, list):
@@ -159,35 +159,35 @@ def build_enhanced_system_prompt(
             elif isinstance(value, str):
                 context_section += f"{value}\n"
             context_section += "\n"
-        
+
         enhanced_prompt += context_section
-    
+
     return enhanced_prompt
 
 
 def build_context_enhanced_system_prompt(
-    base_prompt: str, 
-    model_class: type[BaseModel], 
+    base_prompt: str,
+    model_class: type[BaseModel],
     context_hints: dict[str, Any] | None = None
 ) -> str:
     """
     Build system prompt with context hints integration.
     Simpler version focusing primarily on context enhancement.
-    
+
     Args:
         base_prompt: The base system prompt text
         model_class: The Pydantic model class (for future extensibility)
         context_hints: Optional context hints to include in the prompt
-        
+
     Returns:
         Enhanced system prompt with context hints
     """
     enhanced_prompt = base_prompt
-    
+
     if context_hints:
         context_section = "\n\nCONTEXT HINTS TO CONSIDER (but do not summarize):\n"
         context_section += "Use these hints to improve accuracy, but do not include them in your summary.\n\n"
-        
+
         for key, value in context_hints.items():
             context_section += f"{key.upper()}:\n"
             if isinstance(value, list):
@@ -199,9 +199,9 @@ def build_context_enhanced_system_prompt(
             elif isinstance(value, str):
                 context_section += f"{value}\n"
             context_section += "\n"
-        
+
         enhanced_prompt += context_section
-    
+
     return enhanced_prompt
 
 
@@ -217,7 +217,7 @@ async def process_content_with_structured_output(
 ) -> tuple[BaseModel | None, bool, dict[str, Any]]:
     """
     Core function: Process text using structured output with given Pydantic model.
-    
+
     Args:
         content: The content to process
         model_class: Pydantic model class for structured output
@@ -227,7 +227,7 @@ async def process_content_with_structured_output(
         temperature: Temperature for response generation (defaults to 0.1)
         verbose: Enable verbose output
         context_hints: Optional context hints to enhance the prompt
-        
+
     Returns:
         Tuple of (structured_output, success, metadata)
     """
@@ -238,24 +238,24 @@ async def process_content_with_structured_output(
             "processing_duration": 0.0,
         }
         return None, False, metadata
-    
+
     start_time = time.monotonic()
-    
+
     try:
         client, model_name = initialize_llm(llm_provider, model)
         provider = llm_provider or os.getenv("LLM_PROVIDER", "gemini")
         provider = provider.lower()
-        
+
         # Enhance system prompt with field descriptions and context hints
         enhanced_system_prompt = build_enhanced_system_prompt(
             system_prompt, model_class, context_hints
         )
-        
+
         messages = [
             {"role": "system", "content": enhanced_system_prompt},
             {"role": "user", "content": content},
         ]
-        
+
         if verbose:
             print("🚀 PROMPT BEING SENT TO LLM:")
             print("=" * 60)
@@ -274,9 +274,9 @@ async def process_content_with_structured_output(
             print("\n🔧 STRUCTURED OUTPUT SCHEMA:")
             print(json.dumps(model_class.model_json_schema(), indent=2))
             print("=" * 60)
-        
+
         print("🔄 Calling LLM with structured output..." if verbose else "", end="")
-        
+
         # Use the responses API for structured output
         final_temperature = temperature if temperature is not None else float(os.getenv("LLM_TEMPERATURE", "0.1"))
         response = client.beta.chat.completions.parse(
@@ -285,17 +285,17 @@ async def process_content_with_structured_output(
             response_format=model_class,
             temperature=final_temperature,
         )
-        
+
         processing_duration = time.monotonic() - start_time
-        
+
         if response.choices[0].message.parsed:
             structured_output = response.choices[0].message.parsed
-            
+
             if verbose:
                 print("\n📥 SUCCESS - Structured Output Generated:")
                 print(json.dumps(structured_output.model_dump(), indent=2))
                 print("=" * 60)
-            
+
             metadata = {
                 "provider": provider,
                 "model": model_name,
@@ -303,14 +303,14 @@ async def process_content_with_structured_output(
                 "success": True,
                 "processing_duration": processing_duration,
             }
-            
+
             return structured_output, True, metadata
         else:
             if verbose:
                 print("\n❌ PARSING FAILED")
                 print(f"Raw content: {response.choices[0].message.content}")
                 print(f"Raw response object: {response}")
-            
+
             metadata = {
                 "provider": provider,
                 "model": model_name,
@@ -319,19 +319,19 @@ async def process_content_with_structured_output(
                 "error": "Failed to parse response to structured format",
                 "processing_duration": processing_duration,
             }
-            
+
             return None, False, metadata
-            
+
     except Exception as e:
         if verbose:
             print(f"❌ Exception in process_content_with_structured_output: {e}")
-        
+
         metadata = {
             "success": False,
             "error": str(e),
             "processing_duration": time.monotonic() - start_time,
         }
-        
+
         return None, False, metadata
 
 
@@ -342,25 +342,25 @@ def save_structured_output(
 ) -> str:
     """
     Save structured output to timestamped file with proper naming convention.
-    
+
     Args:
         output: The structured output dictionary to save
         content_type: Type of content for filename
         save_path: Directory to save the file
-        
+
     Returns:
         Path to the saved file
     """
     # Ensure save directory exists
     os.makedirs(save_path, exist_ok=True)
-    
+
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"summary_{content_type}_{timestamp}.json"
     full_path = os.path.join(save_path, filename)
-    
+
     with open(full_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
-    
+
     return full_path
 
 
@@ -369,20 +369,20 @@ def save_summary_to_workspace(
 ) -> str:
     """
     Save a summary BaseModel to the workspace with model information included.
-    
+
     Args:
         summary: BaseModel instance to save
         save_path: Directory to save the file
-        
+
     Returns:
         Path to the saved file
     """
     # Extract content type from the summary (default to "showroom")
     content_type = "showroom"
-    
+
     # Convert to dict for saving
     summary_dict = summary.model_dump()
-    
+
     # Save using the existing function
     return save_structured_output(summary_dict, content_type, save_path)
 
@@ -392,13 +392,13 @@ def print_basemodel(model: BaseModel, title: str = "Model Output") -> None:
     print(f"✅ {title}")
     model_dict = model.model_dump()
     print(json.dumps(model_dict, indent=2, ensure_ascii=False))
-    
+
     # Print summary stats for list fields
     list_fields = []
     for field_name, field_value in model_dict.items():
         if isinstance(field_value, list):
             list_fields.append(f"{field_name}: {len(field_value)} items")
-    
+
     if list_fields:
         print(f"📊 Summary: {', '.join(list_fields)}")
 
@@ -406,22 +406,22 @@ def print_basemodel(model: BaseModel, title: str = "Model Output") -> None:
 def format_showroom_content_for_prompt(showroom_data) -> str:
     """
     Format Showroom data into a structured format suitable for LLM processing.
-    
+
     Args:
         showroom_data: Showroom BaseModel instance
-        
+
     Returns:
         Formatted string containing the lab content for analysis
     """
     content_sections = []
-    
+
     # Add lab metadata
     content_sections.append(f"LAB TITLE: {showroom_data.lab_name}")
     content_sections.append(f"REPOSITORY: {showroom_data.git_url}")
     content_sections.append(f"BRANCH/REF: {showroom_data.git_ref}")
     content_sections.append(f"TOTAL MODULES: {len(showroom_data.modules)}")
     content_sections.append("")
-    
+
     # Add each module's content
     for i, module in enumerate(showroom_data.modules, 1):
         content_sections.append(f"MODULE {i}: {module.module_name}")
@@ -431,7 +431,7 @@ def format_showroom_content_for_prompt(showroom_data) -> str:
         content_sections.append(module.module_content)
         content_sections.append("-" * 50)
         content_sections.append("")
-    
+
     return "\n".join(content_sections)
 
 
@@ -443,13 +443,13 @@ def build_showroom_summary_prompt(
 ) -> tuple[str, str]:
     """
     Build complete system and user prompts for Showroom summary generation.
-    
+
     Args:
         showroom_data: Showroom BaseModel instance with the lab data
         summary_model: The summary Pydantic model class (defaults to ShowroomSummary)
         base_prompt: Optional custom base prompt (uses default if not provided)
         context_hints: Optional context hints to enhance the prompt
-        
+
     Returns:
         Tuple of (system_prompt, user_content) ready for LLM processing
     """
@@ -470,15 +470,15 @@ CRITICAL INSTRUCTIONS:
 - For summary: Provide an objective overview in exactly 5-6 sentences
 
 Be precise, accurate, and focus only on information that is clearly stated or directly demonstrated in the lab content."""
-    
+
     # Build enhanced system prompt
     system_prompt = build_enhanced_system_prompt(
         base_prompt, summary_model, context_hints
     )
-    
+
     # Format user content
     user_content = format_showroom_content_for_prompt(showroom_data)
-    
+
     return system_prompt, user_content
 
 
@@ -487,20 +487,20 @@ def save_review_to_workspace(
 ) -> str:
     """
     Save a review BaseModel to the workspace with model information included.
-    
+
     Args:
         review: BaseModel instance to save
         save_path: Directory to save the file
-        
+
     Returns:
         Path to the saved file
     """
     # Extract content type from the review (default to "showroom")
     content_type = "showroom_review"
-    
+
     # Convert to dict for saving
     review_dict = review.model_dump()
-    
+
     # Save using the existing function
     return save_structured_output(review_dict, content_type, save_path)
 
@@ -513,13 +513,13 @@ def build_showroom_review_prompt(
 ) -> tuple[str, str]:
     """
     Build complete system and user prompts for Showroom review generation.
-    
+
     Args:
         showroom_data: Showroom BaseModel instance with the lab data
         review_model: The review Pydantic model class (defaults to ShowroomReview)
         base_prompt: Optional custom base prompt (uses default if not provided)
         context_hints: Optional context hints to enhance the prompt
-        
+
     Returns:
         Tuple of (system_prompt, user_content) ready for LLM processing
     """
@@ -546,13 +546,13 @@ CRITICAL INSTRUCTIONS:
 - Consider both strengths and areas for improvement
 - Ensure feedback is actionable and helpful for content creators
 - Maintain professional, constructive tone throughout"""
-    
+
     # Build enhanced system prompt
     system_prompt = build_enhanced_system_prompt(
         base_prompt, review_model, context_hints
     )
-    
+
     # Format user content
     user_content = format_showroom_content_for_prompt(showroom_data)
-    
+
     return system_prompt, user_content
