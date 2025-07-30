@@ -28,6 +28,27 @@ class ShowroomModule(BaseModel):
     )
 
 
+class ShowroomSummary(BaseModel):
+    """Pydantic BaseModel for AI-generated Showroom lab summaries."""
+
+    redhat_products: list[str] = Field(
+        ...,
+        description="The Red Hat products EXPLICITLY mentioned in the content"
+    )
+    lab_audience: list[str] = Field(
+        ...,
+        description="The ideal audience for the content"
+    )
+    lab_learning_objectives: list[str] = Field(
+        ...,
+        description="Identify the 4 to 6 learning objectives in the content"
+    )
+    lab_summary: str = Field(
+        ...,
+        description="An objective 5 to 6 sentence summary of the entire content"
+    )
+
+
 class Showroom(BaseModel):
     """Pydantic BaseModel for lab and demo content from Showroom Git repositories."""
 
@@ -39,6 +60,9 @@ class Showroom(BaseModel):
         default="main", description="The git tag or branch to use, defaults to main"
     )
     modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules")
+    summary_output: ShowroomSummary | None = Field(
+        default=None, description="AI-generated summary of the lab content"
+    )
 
 
 class ShowroomState(BaseModel):

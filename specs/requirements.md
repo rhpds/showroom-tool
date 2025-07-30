@@ -152,7 +152,7 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
 
 ### ✅ 6.1 Add the AI based Showroom Summarizer prompt builder - COMPLETED
 
-**User Story:** As a user, I want to be able to use an LLM to perform Various summarization tasks on the showroom such as generating a 506 line summary as to the actual lab itself.
+**User Story:** As a user, I want to be able to use an LLM to perform Various summarization tasks on the showroom such as generating a 5 to 6 line summary as to the actual lab itself.
 
 **✅ Implemented:**
 
@@ -172,6 +172,41 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
   - ✅ Provides prompt size metrics and truncation for large content
   - ✅ Beautiful console output with Rich formatting and clear sections   
 
+
+### ✅ 6.2 Add the Showroom Summarizer BaseModel - COMPLETED
+
+**User Story:** As a user, I want to be able to use an LLM to perform Various summarization tasks on the showroom such as generating a 5 to 6 line summary as to the actual lab itself.
+
+**✅ Implemented:**
+
+- ✅ Implemented a ShowroomSummary Pydantic BaseModel to hold the result of the Summarization:
+```python
+redhat_products: list[str] = Field(..., description="The Red Hat products EXPLICITLY mentioned in the content")
+lab_audience: list[str] = Field(..., description="The ideal audience for the content")
+lab_learning_objectives: list[str] = Field(..., description="Identify the 4 to 6 learning objectives in the content")
+lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary of the entire content")
+```
+- ✅ Added an instance of the ShowroomSummary Pydantic BaseModel to the Showroom Base Model:
+  - ✅ Added `summary_output: Optional[ShowroomSummary]` field to enable AI summary storage
+  - ✅ Set as Optional since summaries are generated on-demand
+- ✅ Enhanced prompt building system with ShowroomSummary support:
+  - ✅ Created `SHOWROOM_SUMMARY_STRUCTURED_PROMPT` specialized for structured summary generation
+  - ✅ Built `build_showroom_summary_structured_prompt()` function for targeted prompts
+  - ✅ Added `build_showroom_summary_generation_prompt()` for complete summary workflow
+  - ✅ Maintains field-specific behavioral instructions for precise AI analysis
+
+### 6.3 
+
+**User Story:** As a user I need to be able to summarize the content of a showroom repo and need to dynamically build a powerful system prompt. This pattern is done well in the sample-code/shared_utilities.py.
+
+**Tasks:**
+
+- Examine the patterns in sample-code/shared_utilities.py especially:
+  - `build_context_enhanced_system_prompt`
+- Copy this library as closely as possible and reimplement a new shared_utilities for showroom
+- Do not implement
+  - `extract_text_from_url`
+  - Any function that is not necessary except those needed to generate the system prompt
 
 ## ✅ Additional Enhancements Implemented
 
@@ -221,6 +256,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 4.1: Basic LangGraph Agentic AI Entry Point
 - ✅ Requirement 5.1: Refactor and fix regressions
 - ✅ Requirement 6.1: AI-based Showroom Summarizer prompt builder
+- ✅ Requirement 6.2: Showroom Summarizer BaseModel
 
 **Additional enhancements** implemented for superior user experience and robustness.
 

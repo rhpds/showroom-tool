@@ -25,6 +25,24 @@ Provide detailed, accurate summaries that would help technical sellers, educator
 Your summary should be comprehensive enough to give readers a complete understanding of what the lab teaches, how it's structured, and what participants will accomplish by completing it."""
 
 
+# Specialized prompt for ShowroomSummary generation
+SHOWROOM_SUMMARY_STRUCTURED_PROMPT = """You are an expert technical content analyst specializing in analyzing Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and extract specific structured information.
+
+ANALYSIS FOCUS:
+- Identify Red Hat products explicitly mentioned in the content (not implied or assumed)
+- Determine the target audience based on skill level, roles, and prerequisites
+- Extract clear learning objectives that participants will achieve
+- Create a concise but comprehensive summary of the entire lab experience
+
+CRITICAL INSTRUCTIONS:
+- For Red Hat products: Only include products that are explicitly named in the content
+- For audience: Consider technical level, job roles, and experience requirements
+- For learning objectives: Focus on specific skills and knowledge participants will gain
+- For summary: Provide an objective overview in exactly 5-6 sentences
+
+Be precise, accurate, and focus only on information that is clearly stated or directly demonstrated in the lab content."""
+
+
 def extract_field_descriptions(model_class: type[BaseModel]) -> str:
     """
     Extract field descriptions from a Pydantic model and format them with behavioral directives.
@@ -102,6 +120,34 @@ def build_showroom_summary_prompt(
     return enhanced_prompt
 
 
+def build_showroom_summary_structured_prompt(
+    summary_model: type[BaseModel],
+    include_field_instructions: bool = True
+) -> str:
+    """
+    Build a structured prompt specifically for ShowroomSummary generation.
+
+    Args:
+        summary_model: The ShowroomSummary Pydantic model class
+        include_field_instructions: Whether to include field-specific instructions
+
+    Returns:
+        Complete system prompt for structured summary generation
+    """
+    base_prompt = SHOWROOM_SUMMARY_STRUCTURED_PROMPT
+
+    if include_field_instructions:
+        field_instructions = extract_field_descriptions(summary_model)
+        if field_instructions:
+            enhanced_prompt = f"{base_prompt}\n\n{field_instructions}"
+        else:
+            enhanced_prompt = base_prompt
+    else:
+        enhanced_prompt = base_prompt
+
+    return enhanced_prompt
+
+
 def format_showroom_content_for_prompt(showroom_data) -> str:
     """
     Format Showroom data into a structured format suitable for LLM processing.
@@ -152,6 +198,31 @@ def build_complete_showroom_analysis_prompt(
     """
     system_prompt = build_showroom_summary_prompt(
         showroom_model, include_field_instructions
+    )
+
+    user_content = format_showroom_content_for_prompt(showroom_data)
+
+    return system_prompt, user_content
+
+
+def build_showroom_summary_generation_prompt(
+    showroom_data,
+    summary_model: type[BaseModel],
+    include_field_instructions: bool = True
+) -> tuple[str, str]:
+    """
+    Build complete system and user prompts for ShowroomSummary generation.
+
+    Args:
+        showroom_data: Showroom BaseModel instance with the lab data
+        summary_model: The ShowroomSummary Pydantic model class
+        include_field_instructions: Whether to include field-specific instructions
+
+    Returns:
+        Tuple of (system_prompt, user_content) ready for LLM summary generation
+    """
+    system_prompt = build_showroom_summary_structured_prompt(
+        summary_model, include_field_instructions
     )
 
     user_content = format_showroom_content_for_prompt(showroom_data)

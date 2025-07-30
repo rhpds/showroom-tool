@@ -14,14 +14,12 @@ from rich.console import Console
 # Try to import from the installed package structure
 try:
     from config.basemodels import Showroom
-    from showroom_tool.prompts import build_complete_showroom_analysis_prompt
     from showroom_tool.showroom import count_words_and_lines
 except ImportError:
     # Fall back to adding the project root to path (for development)
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
     from config.basemodels import Showroom
-    from showroom_tool.prompts import build_complete_showroom_analysis_prompt
     from showroom_tool.showroom import count_words_and_lines
 
 console = Console()
@@ -61,7 +59,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--output-summary-prompt",
         action="store_true",
-        help="Display the AI summary prompt that would be sent to the LLM",
+        help="Display the standard AI summary prompt (no repository required)",
     )
 
     return parser.parse_args()
@@ -70,6 +68,35 @@ def parse_arguments() -> argparse.Namespace:
 async def main_async():
     """Main CLI entry point using LangGraph."""
     args = parse_arguments()
+
+    # Handle --output-summary-prompt argument first (doesn't require repo)
+    if args.output_summary_prompt:
+        console.print("\n[bold blue]AI Summary Prompt Builder[/bold blue]")
+        console.print("[blue]Displaying standard Showroom lab analysis prompt...[/blue]")
+
+        try:
+            from showroom_tool.prompts import build_showroom_summary_prompt
+
+            # Build the standard prompt without requiring actual showroom data
+            system_prompt = build_showroom_summary_prompt(
+                showroom_model=Showroom,
+                include_field_instructions=True
+            )
+
+            console.print("\n[bold green]STANDARD SYSTEM PROMPT:[/bold green]")
+            console.print("[dim]" + "=" * 80 + "[/dim]")
+            console.print(system_prompt)
+            console.print("[dim]" + "=" * 80 + "[/dim]")
+
+            console.print(f"\n[blue]Prompt length: {len(system_prompt)} characters[/blue]")
+            console.print("[green]This prompt is ready to be used with any Showroom lab content[/green]")
+            console.print("[dim]Tip: Run with a repository URL to see the complete prompt with lab content[/dim]")
+
+        except Exception as e:
+            console.print(f"[red]Error building summary prompt: {e}[/red]")
+            sys.exit(1)
+
+        return  # Exit after showing prompt
 
     # Determine the repository URL (from positional arg or --repo flag)
     repo_url = args.repo_url or args.repo
@@ -81,6 +108,9 @@ async def main_async():
         )
         console.print(
             "   or: showroom-tool --repo <repo_url> [--ref <branch>] [--verbose] [--no-cache] [--cache-dir <dir>]"
+        )
+        console.print(
+            "   or: showroom-tool --output-summary-prompt (to see the standard AI prompt)"
         )
         sys.exit(1)
 
@@ -121,41 +151,6 @@ async def main_async():
     except Exception as e:
         console.print(f"[red]Error during graph processing: {e}[/red]")
         sys.exit(1)
-
-    # Handle --output-summary-prompt argument
-    if args.output_summary_prompt:
-        console.print("\n[bold blue]AI Summary Prompt Builder[/bold blue]")
-        console.print("[blue]Building system prompt for Showroom lab analysis...[/blue]")
-
-        try:
-            system_prompt, user_content = build_complete_showroom_analysis_prompt(
-                showroom_data=showroom,
-                showroom_model=Showroom,
-                include_field_instructions=True
-            )
-
-            console.print("\n[bold green]SYSTEM PROMPT:[/bold green]")
-            console.print("[dim]" + "=" * 80 + "[/dim]")
-            console.print(system_prompt)
-            console.print("[dim]" + "=" * 80 + "[/dim]")
-
-            console.print(f"\n[bold green]USER CONTENT:[/bold green] [dim]({len(user_content)} characters)[/dim]")
-            console.print("[dim]" + "=" * 80 + "[/dim]")
-            # Show first 500 characters of user content to avoid overwhelming output
-            if len(user_content) > 500:
-                console.print(user_content[:500] + "\n[dim]... (truncated, full content would be sent to LLM)[/dim]")
-            else:
-                console.print(user_content)
-            console.print("[dim]" + "=" * 80 + "[/dim]")
-
-            console.print(f"\n[blue]Total prompt size: {len(system_prompt)} + {len(user_content)} = {len(system_prompt) + len(user_content)} characters[/blue]")
-            console.print("[green]Prompt successfully generated and ready for LLM analysis[/green]")
-
-        except Exception as e:
-            console.print(f"[red]Error building summary prompt: {e}[/red]")
-            sys.exit(1)
-
-        return  # Exit after showing prompt
 
     # For now, just display the results
     console.print("\n[bold green]Showroom Lab Summary:[/bold green]")
