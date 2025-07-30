@@ -31,14 +31,12 @@ except ImportError:
 
 def initialize_llm(
     llm_provider: str | None = None, model: str | None = None
-) -> tuple[OpenAI, str]:
-    """Initialize LLM client with provider detection. Fails if not set."""
+) -> tuple[Any, str]:
+    """Initialize LLM client with provider detection. Defaults to Gemini."""
     if not OPENAI_AVAILABLE:
         raise ImportError("OpenAI package is not installed. Install it with 'pip install openai'")
     
-    provider = llm_provider or os.getenv("LLM_PROVIDER")
-    if not provider:
-        raise ValueError("LLM_PROVIDER must be set in environment or passed explicitly")
+    provider = llm_provider or os.getenv("LLM_PROVIDER", "gemini")
     provider = provider.lower()
 
     if provider == "local":
@@ -49,17 +47,28 @@ def initialize_llm(
             raise ValueError(
                 "LOCAL_OPENAI_API_KEY, LOCAL_OPENAI_BASE_URL, and LOCAL_OPENAI_MODEL must be set for local provider"
             )
+        if OpenAI is None:
+            raise ImportError("OpenAI package is not installed")
         client = OpenAI(api_key=api_key, base_url=base_url)
     elif provider == "openai":
         api_key = os.getenv("OPENAI_API_KEY")
-        model_name = model or os.getenv("OPENAI_MODEL")
-        if not api_key or not model_name:
-            raise ValueError(
-                "OPENAI_API_KEY and OPENAI_MODEL must be set for openai provider"
-            )
+        model_name = model or os.getenv("OPENAI_MODEL", "gpt-4o-2024-08-06")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY must be set for openai provider")
+        if OpenAI is None:
+            raise ImportError("OpenAI package is not installed")
         client = OpenAI(api_key=api_key)
+    elif provider == "gemini":
+        api_key = os.getenv("GEMINI_API_KEY")
+        base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+        model_name = model or os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY must be set for gemini provider")
+        if OpenAI is None:
+            raise ImportError("OpenAI package is not installed")
+        client = OpenAI(api_key=api_key, base_url=base_url)
     else:
-        raise ValueError(f"Unknown LLM_PROVIDER: {provider}")
+        raise ValueError(f"Unknown LLM_PROVIDER: {provider}. Supported: local, openai, gemini")
     return client, model_name
 
 
@@ -202,6 +211,7 @@ async def process_content_with_structured_output(
     system_prompt: str,
     llm_provider: str | None = None,
     model: str | None = None,
+    temperature: float | None = None,
     verbose: bool = False,
     context_hints: dict[str, Any] | None = None,
 ) -> tuple[BaseModel | None, bool, dict[str, Any]]:
@@ -212,8 +222,9 @@ async def process_content_with_structured_output(
         content: The content to process
         model_class: Pydantic model class for structured output
         system_prompt: System prompt for the LLM
-        llm_provider: LLM provider ("openai" or "local")
+        llm_provider: LLM provider ("openai", "local", or "gemini")
         model: Model name to use
+        temperature: Temperature for response generation (defaults to 0.1)
         verbose: Enable verbose output
         context_hints: Optional context hints to enhance the prompt
         
@@ -271,11 +282,12 @@ async def process_content_with_structured_output(
         print("🔄 Calling LLM with structured output..." if verbose else "", end="")
         
         # Use the responses API for structured output
+        final_temperature = temperature if temperature is not None else float(os.getenv("LLM_TEMPERATURE", "0.1"))
         response = client.beta.chat.completions.parse(
             model=model_name,
             messages=messages,
             response_format=model_class,
-            temperature=0,
+            temperature=final_temperature,
         )
         
         processing_duration = time.monotonic() - start_time
