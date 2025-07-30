@@ -14,7 +14,10 @@ from rich.console import Console
 # Try to import from the installed package structure
 try:
     from config.basemodels import ShowroomReview, ShowroomSummary
-    from showroom_tool.prompts import build_showroom_summary_structured_prompt
+    from showroom_tool.prompts import (
+        build_showroom_review_structured_prompt,
+        build_showroom_summary_structured_prompt,
+    )
     from showroom_tool.shared_utilities import (
         build_showroom_review_prompt,
         build_showroom_summary_prompt,
@@ -29,7 +32,10 @@ except ImportError:
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
     from config.basemodels import ShowroomReview, ShowroomSummary
-    from showroom_tool.prompts import build_showroom_summary_structured_prompt
+    from showroom_tool.prompts import (
+        build_showroom_review_structured_prompt,
+        build_showroom_summary_structured_prompt,
+    )
     from showroom_tool.shared_utilities import (
         build_showroom_review_prompt,
         build_showroom_summary_prompt,
@@ -100,16 +106,12 @@ def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments for showroom-tool."""
     parser = argparse.ArgumentParser(
         description="Showroom Tool - CLI for summarizing, reviewing, and validating technical lab content",
-        epilog="Examples:\n  showroom-tool https://github.com/example/my-lab\n  showroom-tool summary https://github.com/example/my-lab",
+        epilog="Examples:\n  showroom-tool summary https://github.com/example/my-lab\n  showroom-tool review https://github.com/example/my-lab",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     # Add subcommands
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
-
-    # Default command (fetch/analyze) - for backward compatibility
-    fetch_parser = subparsers.add_parser("fetch", help="Fetch and analyze showroom repository (default)")
-    add_common_arguments(fetch_parser)
 
     # Summary command - fetch + LLM summarization
     summary_parser = subparsers.add_parser("summary", help="Generate AI-powered summary of showroom content")
@@ -120,9 +122,6 @@ def parse_arguments() -> argparse.Namespace:
     review_parser = subparsers.add_parser("review", help="Generate AI-powered review of showroom content")
     add_common_arguments(review_parser)
     add_llm_arguments(review_parser)
-
-    # Prompt command - just show the prompt
-    _ = subparsers.add_parser("prompt", help="Display the AI summary prompt template")
 
     return parser.parse_args()
 
@@ -179,27 +178,32 @@ def add_llm_arguments(parser):
         default=None,
         help="Temperature for LLM generation (default: 0.1)",
     )
+    parser.add_argument(
+        "--show-prompt",
+        action="store_true",
+        help="Display the AI prompt template instead of processing content",
+    )
 
-
-async def handle_prompt_command():
-    """Handle the prompt command to display AI summary prompt template."""
-    console.print("\n[bold blue]AI Summary Prompt Builder[/bold blue]")
-    console.print("[blue]Displaying standard Showroom lab analysis prompt...[/blue]")
-
-    try:
-        # Build the standard prompt without requiring actual showroom data
-        system_prompt = build_showroom_summary_structured_prompt(ShowroomSummary)
-        console.print("\n[bold green]Standard AI Analysis Prompt:[/bold green]")
-        console.print(f"[dim]Length: {len(system_prompt)} characters[/dim]\n")
-        console.print(system_prompt)
-
-    except Exception as e:
-        console.print(f"[red]Error building prompt: {e}[/red]")
-        sys.exit(1)
 
 
 async def handle_summary_command(args):
     """Handle the summary command to generate AI-powered summary."""
+    # Check if user wants to see the prompt template
+    if args.show_prompt:
+        console.print("\n[bold blue]AI Summary Prompt Template[/bold blue]")
+        console.print("[blue]Displaying standard Showroom lab summary analysis prompt...[/blue]")
+
+        try:
+            # Build the standard prompt without requiring actual showroom data
+            system_prompt = build_showroom_summary_structured_prompt(ShowroomSummary)
+            console.print("\n[bold green]Summary Analysis Prompt:[/bold green]")
+            console.print(f"[dim]Length: {len(system_prompt)} characters[/dim]\n")
+            console.print(system_prompt)
+            return
+        except Exception as e:
+            console.print(f"[red]Error building prompt: {e}[/red]")
+            sys.exit(1)
+
     # Determine output mode
     is_json_output = args.output == "json"
 
@@ -282,6 +286,22 @@ async def handle_summary_command(args):
 
 async def handle_review_command(args):
     """Handle the review command to generate AI-powered review."""
+    # Check if user wants to see the prompt template
+    if args.show_prompt:
+        console.print("\n[bold blue]AI Review Prompt Template[/bold blue]")
+        console.print("[blue]Displaying standard Showroom lab review analysis prompt...[/blue]")
+
+        try:
+            # Build the standard prompt without requiring actual showroom data
+            system_prompt = build_showroom_review_structured_prompt(ShowroomReview)
+            console.print("\n[bold green]Review Analysis Prompt:[/bold green]")
+            console.print(f"[dim]Length: {len(system_prompt)} characters[/dim]\n")
+            console.print(system_prompt)
+            return
+        except Exception as e:
+            console.print(f"[red]Error building prompt: {e}[/red]")
+            sys.exit(1)
+
     # Determine output mode
     is_json_output = args.output == "json"
 
@@ -424,70 +444,27 @@ async def fetch_showroom_data(args):
         sys.exit(1)
 
 
-async def handle_fetch_command(args):
-    """Handle the fetch command with detailed showroom display."""
-    showroom = await fetch_showroom_data(args)
-
-    # Support both verbose and json output formats
-    if args.output == "json":
-        # Output clean JSON for automation/piping
-        import json
-        print(json.dumps(showroom.model_dump(), indent=2))
-    else:
-        # Use the same detailed display format as summary command
-        display_showroom_details(showroom, args)
-
-
-def display_showroom_results(showroom, args):
-    """Display showroom results in the console."""
-    console.print("\n[bold green]Showroom Lab Summary:[/bold green]")
-    console.print(f"  [bold]Name:[/bold] [bright_cyan]{showroom.lab_name}[/bright_cyan]")
-    console.print(f"  [bold]URL:[/bold] [blue]{showroom.git_url}[/blue]")
-    console.print(f"  [bold]Ref:[/bold] [yellow]{showroom.git_ref}[/yellow]")
-    console.print(f"  [bold]Modules:[/bold] [bright_magenta]{len(showroom.modules)}[/bright_magenta]")
-
-    for i, module in enumerate(showroom.modules, 1):
-        display_name = module.module_name.strip() if module.module_name.strip() else "(no title)"
-        from rich.markup import escape
-        safe_display_name = escape(display_name)
-        word_count, line_count = count_words_and_lines(module.module_content)
-
-        if args.verbose:
-            module_line = (
-                f"    [bright_white]{i}.[/bright_white] "
-                f"[bold]{safe_display_name}[/bold] "
-                f"[cyan]\\[{module.filename}][/cyan] "
-                f"[dim]({word_count} words, {line_count} lines)[/dim]"
-            )
-        else:
-            module_line = (
-                f"    [bright_white]{i}.[/bright_white] "
-                f"[bold]{safe_display_name}[/bold] "
-                f"[cyan]\\[{module.filename}][/cyan] "
-                f"[dim]({word_count} words, {line_count} lines)[/dim]"
-            )
-        console.print(module_line)
-
-    if args.verbose:
-        console.print("\n[blue]Showroom data model successfully populated via LangGraph[/blue]")
-
 
 async def main_async():
     """Main CLI entry point using LangGraph."""
     args = parse_arguments()
 
     # Handle different commands
-    if args.command == "prompt":
-        await handle_prompt_command()
-    elif args.command == "summary":
+    if args.command == "summary":
         await handle_summary_command(args)
     elif args.command == "review":
         await handle_review_command(args)
-    elif args.command == "fetch" or args.command is None:
-        # Default behavior for backward compatibility
-        await handle_fetch_command(args)
+    elif args.command is None:
+        # No command provided - show help
+        console.print("[red]Error: No command specified[/red]")
+        console.print("\n[blue]Available commands:[/blue]")
+        console.print("  [bold]summary[/bold] - Generate AI-powered summary of showroom content")
+        console.print("  [bold]review[/bold]  - Generate AI-powered review of showroom content")
+        console.print("\n[dim]Use 'showroom-tool <command> --help' for detailed help on a command[/dim]")
+        sys.exit(1)
     else:
         console.print(f"[red]Unknown command: {args.command}[/red]")
+        console.print("[blue]Available commands: summary, review[/blue]")
         sys.exit(1)
 
 

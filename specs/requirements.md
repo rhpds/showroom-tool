@@ -346,6 +346,26 @@ review_summary: str = Field(..., description="3-4 sentence overall review summar
   - ✅ Workspace saving functionality
 - ✅ Complete LLM integration ready for production use
 
+### ✅ 8.1 Refactor and clean up CLI UI - COMPLETED
+
+**User Story:** User wants a cleaner and more consistent cli UX
+
+**✅ Implemented:**
+
+- ✅ Removed redundant `showroom-tool fetch` command as fetch is implicit in both `summary` and `review`
+- ✅ Removed the standalone `prompt` command verb
+- ✅ Added `--show-prompt` argument to both `summary` and `review` commands:
+  - ✅ `showroom-tool summary --show-prompt` - displays summary analysis prompt template
+  - ✅ `showroom-tool review --show-prompt` - displays review analysis prompt template
+- ✅ Streamlined CLI to only two core commands: `summary` and `review`
+- ✅ Enhanced error handling for invalid/missing commands with helpful guidance
+- ✅ Updated command dispatcher and removed unused functions
+- ✅ Maintained all existing functionality while simplifying the interface
+
+**CLI Structure Changes:**
+- **Before:** `fetch`, `summary`, `review`, `prompt` commands
+- **After:** `summary`, `review` commands with `--show-prompt` flags
+- **Cleaner UX:** Users now have a consistent interface with dedicated prompt viewing within each command
 
 
 ## ✅ Additional Enhancements Implemented
@@ -403,6 +423,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 7.2: Enhanced verbose output with detailed lab and module information
 - ✅ Requirement 7.3: Consistent verbose output format for fetch command
 - ✅ Requirement 8: AI-powered review capability with structured scoring and feedback
+- ✅ Requirement 8.1: Refactored and cleaned up CLI UI for better user experience
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
@@ -411,22 +432,15 @@ The showroom-tool is now a **professional-grade CLI application** ready for prod
 ## Usage Examples
 
 ```bash
-# Fetch and display showroom details (verbose format)
-showroom-tool fetch https://github.com/example/my-showroom
-showroom-tool fetch https://github.com/example/my-showroom --output verbose
-
-# Fetch with JSON output for automation/piping
-showroom-tool fetch https://github.com/example/my-showroom --output json | jq
-showroom-tool fetch https://github.com/example/my-showroom --output json > showroom.json
-
-# With specific branch and verbose output  
-showroom-tool fetch --repo https://github.com/example/my-showroom --ref develop --verbose
-
 # AI-powered summary generation
 showroom-tool summary https://github.com/example/my-showroom
 
 # AI-powered review generation with detailed scoring and feedback
 showroom-tool review https://github.com/example/my-showroom
+
+# With specific branch and verbose output  
+showroom-tool summary --repo https://github.com/example/my-showroom --ref develop --verbose
+showroom-tool review --repo https://github.com/example/my-showroom --ref develop --verbose
 
 # Clean JSON output for automation/piping
 showroom-tool summary https://github.com/example/my-showroom --output json | jq
@@ -438,12 +452,12 @@ showroom-tool review https://github.com/example/my-showroom --output json > revi
 showroom-tool summary https://github.com/example/my-showroom --llm-provider gemini --temperature 0.2
 showroom-tool review https://github.com/example/my-showroom --llm-provider openai --temperature 0.1
 
-# Display AI prompt template
-showroom-tool prompt
+# Display AI prompt templates
+showroom-tool summary --show-prompt
+showroom-tool review --show-prompt
 
 # Help
 showroom-tool --help
-showroom-tool fetch --help
 showroom-tool summary --help
 showroom-tool review --help
 ```
