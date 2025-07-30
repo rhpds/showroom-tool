@@ -39,6 +39,59 @@ except ImportError:
 console = Console()
 
 
+def display_showroom_details(showroom, args):
+    """Display detailed showroom information in verbose mode."""
+    console.print("\n[bold green]📚 Showroom Lab Details[/bold green]")
+    console.print("=" * 60)
+    
+    # Lab metadata
+    console.print(f"[bold]Lab Name:[/bold] [bright_cyan]{showroom.lab_name}[/bright_cyan]")
+    console.print(f"[bold]Git Repository:[/bold] [blue]{showroom.git_url}[/blue]")
+    console.print(f"[bold]Git Reference:[/bold] [yellow]{showroom.git_ref}[/yellow]")
+    console.print(f"[bold]Total Modules:[/bold] [bright_magenta]{len(showroom.modules)}[/bright_magenta]")
+    
+    # Module details
+    console.print(f"\n[bold green]📖 Module Breakdown[/bold green]")
+    console.print("-" * 60)
+    
+    total_words = 0
+    total_lines = 0
+    
+    for i, module in enumerate(showroom.modules, 1):
+        # Get module display name
+        display_name = module.module_name.strip() if module.module_name.strip() else "(no title)"
+        
+        # Escape special characters to avoid Rich formatting conflicts
+        from rich.markup import escape
+        safe_display_name = escape(display_name)
+        
+        # Count words and lines
+        word_count, line_count = count_words_and_lines(module.module_content)
+        total_words += word_count
+        total_lines += line_count
+        
+        # Display module info with rich formatting
+        console.print(
+            f"  [bright_white]{i:2d}.[/bright_white] "
+            f"[bold]{safe_display_name}[/bold]"
+        )
+        console.print(
+            f"      [dim]File:[/dim] [cyan]{module.filename}[/cyan] "
+            f"[dim]|[/dim] [green]{word_count:,} words[/green] "
+            f"[dim]|[/dim] [blue]{line_count:,} lines[/blue]"
+        )
+    
+    # Summary totals
+    console.print("-" * 60)
+    console.print(
+        f"[bold]📊 Totals:[/bold] "
+        f"[green]{total_words:,} words[/green] "
+        f"[dim]|[/dim] [blue]{total_lines:,} lines[/blue] "
+        f"[dim]across[/dim] [bright_magenta]{len(showroom.modules)} modules[/bright_magenta]"
+    )
+    console.print("=" * 60)
+
+
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments for showroom-tool."""
     parser = argparse.ArgumentParser(
@@ -146,6 +199,10 @@ async def handle_summary_command(args):
     
     # Get repository data first
     showroom = await fetch_showroom_data(args)
+    
+    # Display detailed showroom information in verbose mode
+    if not is_json_output and args.output == "verbose":
+        display_showroom_details(showroom, args)
     
     # Generate AI summary
     if not is_json_output:

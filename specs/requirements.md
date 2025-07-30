@@ -242,6 +242,22 @@ lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary 
 - ✅ Perfect for automation and shell scripting workflows  
 
 
+### ✅ 7.2 Add more detail to `--output verbose` - COMPLETED
+
+**User Story:** User wants a clear understanding of the lab and modules including name, word and line count from the showroom loading stage
+
+**✅ Implemented:**
+
+- ✅ Enhanced `--output verbose` mode with comprehensive showroom details display:
+  - ✅ Colorized lab metadata (Name, Git Repo, Git Ref, Module Count)
+  - ✅ Detailed module breakdown with numbered list showing:
+    - ✅ Module name with Rich markup escaping for safety
+    - ✅ Module filename with cyan highlighting
+    - ✅ Word and line counts with thousand separators
+  - ✅ Summary totals across all modules
+  - ✅ Beautiful console formatting with emojis and colors
+  - ✅ Only displays in verbose mode, hidden in JSON mode
+
 ## ✅ Additional Enhancements Implemented
 
 Beyond the original requirements, the following enhancements were added during development:
@@ -294,6 +310,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 6.3: Shared utilities library for system prompt generation
 - ✅ Requirement 7: Complete LLM integration with summary command
 - ✅ Requirement 7.1: Clean JSON output for automation and piping
+- ✅ Requirement 7.2: Enhanced verbose output with detailed lab and module information
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
