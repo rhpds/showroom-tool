@@ -208,6 +208,27 @@ lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary 
   - `extract_text_from_url`
   - Any function that is not necessary except those needed to generate the system prompt
 
+
+### 7
+
+**User Story:** User needs to now pass the showroom content to a LLM with the system prompt to get the LLM feedback in s structured format
+
+**Tasks:**
+
+- Add the OpenAI LLM calling capability to the shared_utilities
+  - Use OpenAI API `responses`
+  - Ensure structured outputs in the form of `ShowroomSummary` BaseModel
+    - HINT: Use context7 MCP server to 
+    - Sample Code: https://platform.openai.com/docs/guides/structured-outputs?api-mode=responses
+- Use variables to allow changing the following
+  - `llm_provider`: LLM Provider - default to Google Gemini
+  - `model`: LLM Model - default to gemini-2.5-pro
+  - `temperature`: temperature - default to 0.1
+- Assume LLM auth e.g API Keys will be env vars
+- Add `summary` verb so the following command will work
+  - `uv run showroom-tool summary https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git`
+
+
 ## ✅ Additional Enhancements Implemented
 
 Beyond the original requirements, the following enhancements were added during development:
