@@ -264,47 +264,51 @@ lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary 
 
 **✅ Implemented:**
 
-### 7.3 Reuse the `--output verbose` option with `showroom-tool fetch`
+### ✅ 7.3 Reuse the `--output verbose` option with `showroom-tool fetch` - COMPLETED
 
 **User Story:** User wants consistent outputs for similar operations
 
-**Tasks:**
+**✅ Implemented:**
 
-- Ensure the output of `showroom-tool fetch` matches the initial output of `showroom-tool ... --output verbose` 
-<EXAMPLE>
+- ✅ Modified `handle_fetch_command` to use `display_showroom_details()` for rich verbose output
+- ✅ Added `--output` flag to common arguments (supports both `verbose` and `json`)
+- ✅ Removed duplicate `--output` flag from LLM-specific arguments to avoid conflicts
+- ✅ Added JSON output support to fetch command for automation and piping
+- ✅ Ensured consistent output format between `fetch` and `summary --output verbose` commands
+
+**Verified Output Format:**
 ```txt
 📚 Showroom Lab Details
 ============================================================
-Lab Name: Experience Red Hat OpenShift Virtualization
-Git Repository: https://github.com/rhpds/openshift-virt-roadshow-cnv-multi-user
+Lab Name: Summit 2025 - LB2906 - Getting Started with Llamastack
+Git Repository: https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git
 Git Reference: main
 Total Modules: 9
 
 📖 Module Breakdown
 ------------------------------------------------------------
-   1. Welcome to {lab_name}!
-      File: index.adoc | 1,342 words | 77 lines
-   2. Virtual Machine Management
-      File: module-01-intro.adoc | 2,784 words | 185 lines
-   3. Migrating Existing Virtual Machines
-      File: module-02-mtv.adoc | 2,465 words | 184 lines
-   4. Storage Management
-      File: module-04-storage.adoc | 1,545 words | 117 lines
-   5. Backup and Recovery for Virtual Machines
-      File: module-05-bcdr.adoc | 1,054 words | 129 lines
-   6. Template and InstanceType Management
-      File: module-07-tempinst.adoc | 2,679 words | 346 lines
-   7. Working with Virtual Machines and Applications
-      File: module-08-workingvms.adoc | 1,190 words | 118 lines
-   8. Network Management for Virtual Machines
-      File: module-09-networking.adoc | 2,220 words | 223 lines
-   9. Key Takeaways
-      File: conclusion.adoc | 503 words | 34 lines
+   1. AI Applications and Llama Stack: A practical workshop
+      File: index.adoc | 615 words | 14 lines
+   2. [NOTE]
+      File: 01-Getting-Started.adoc | 1,553 words | 230 lines
+   3. Module 2: Llama Stack Inference Basics
+      File: 02_Lllamastack_Inference_Basics.adoc | 499 words | 34 lines
+   4. Module 3: Retrieval-Augmented Generation (RAG) Basics
+      File: 03_RAG_Agent_Basic_Example.adoc | 276 words | 15 lines
+   5. Module 4: Agents and Tools
+      File: 04_Agents_and_Tools.adoc | 283 words | 14 lines
+   6. Module 5: Exploring ReAct Agents and Tool Use
+      File: 05_React_Agents.adoc | 1,329 words | 53 lines
+   7. Module 6: Working with MCP Servers
+      File: 06_MCP_Servers_Intro.adoc | 369 words | 14 lines
+   8. Module 7: Putting it all together
+      File: 07_Putting_It_All_Together.adoc | 639 words | 30 lines
+   9. Credentials and Useful URLs
+      File: Creds-URLs-Resources.adoc | 80 words | 23 lines
 ------------------------------------------------------------
-📊 Totals: 15,782 words | 1,413 lines across 9 modules
+📊 Totals: 5,643 words | 427 lines across 9 modules
 ============================================================
 ```
-</EXAMPLE>
 
 ## ✅ Additional Enhancements Implemented
 
@@ -359,6 +363,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 7: Complete LLM integration with summary command
 - ✅ Requirement 7.1: Clean JSON output for automation and piping
 - ✅ Requirement 7.2: Enhanced verbose output with detailed lab and module information
+- ✅ Requirement 7.3: Consistent verbose output format for fetch command
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
@@ -367,11 +372,16 @@ The showroom-tool is now a **professional-grade CLI application** ready for prod
 ## Usage Examples
 
 ```bash
-# Basic usage
-showroom-tool https://github.com/example/my-showroom
+# Fetch and display showroom details (verbose format)
+showroom-tool fetch https://github.com/example/my-showroom
+showroom-tool fetch https://github.com/example/my-showroom --output verbose
+
+# Fetch with JSON output for automation/piping
+showroom-tool fetch https://github.com/example/my-showroom --output json | jq
+showroom-tool fetch https://github.com/example/my-showroom --output json > showroom.json
 
 # With specific branch and verbose output  
-showroom-tool --repo https://github.com/example/my-showroom --ref develop --verbose
+showroom-tool fetch --repo https://github.com/example/my-showroom --ref develop --verbose
 
 # AI-powered summary generation
 showroom-tool summary https://github.com/example/my-showroom
@@ -388,6 +398,7 @@ showroom-tool prompt
 
 # Help
 showroom-tool --help
+showroom-tool fetch --help
 showroom-tool summary --help
 ```
 

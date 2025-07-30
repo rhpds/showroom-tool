@@ -201,4 +201,5 @@ dist
 
 # Temporary folders
 tmp/
-temp/ workspace/
+temp/ 
+workspace/*

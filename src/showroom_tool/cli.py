@@ -143,6 +143,12 @@ def add_common_arguments(parser):
         default=None,
         help="Custom cache directory (default: ~/.showroom-tool/cache)",
     )
+    parser.add_argument(
+        "--output",
+        default="verbose",
+        choices=["verbose", "json"],
+        help="Output format: 'verbose' for rich console output (default), 'json' for clean JSON output",
+    )
 
 
 def add_llm_arguments(parser):
@@ -163,12 +169,6 @@ def add_llm_arguments(parser):
         type=float,
         default=None,
         help="Temperature for LLM generation (default: 0.1)",
-    )
-    parser.add_argument(
-        "--output",
-        default="verbose",
-        choices=["verbose", "json"],
-        help="Output format: 'verbose' for rich console output (default), 'json' for clean JSON output",
     )
 
 
@@ -334,9 +334,17 @@ async def fetch_showroom_data(args):
 
 
 async def handle_fetch_command(args):
-    """Handle the fetch command (original behavior)."""
+    """Handle the fetch command with detailed showroom display."""
     showroom = await fetch_showroom_data(args)
-    display_showroom_results(showroom, args)
+    
+    # Support both verbose and json output formats
+    if args.output == "json":
+        # Output clean JSON for automation/piping
+        import json
+        print(json.dumps(showroom.model_dump(), indent=2))
+    else:
+        # Use the same detailed display format as summary command
+        display_showroom_details(showroom, args)
 
 
 def display_showroom_results(showroom, args):
