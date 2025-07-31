@@ -14,6 +14,7 @@ from rich.console import Console
 # Try to import from the installed package structure
 try:
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    from showroom_tool.outputs import output_basemodel_as_adoc, check_jinja2_availability
     from showroom_tool.prompts import (
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
@@ -35,6 +36,7 @@ except ImportError:
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    from showroom_tool.outputs import output_basemodel_as_adoc, check_jinja2_availability
     from showroom_tool.prompts import (
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
@@ -165,8 +167,8 @@ def add_common_arguments(parser):
     parser.add_argument(
         "--output",
         default="verbose",
-        choices=["verbose", "json"],
-        help="Output format: 'verbose' for rich console output (default), 'json' for clean JSON output",
+        choices=["verbose", "json", "adoc"],
+        help="Output format: 'verbose' for rich console output (default), 'json' for clean JSON output, 'adoc' for AsciiDoc output",
     )
 
 
@@ -217,30 +219,31 @@ async def handle_summary_command(args):
 
     # Determine output mode
     is_json_output = args.output == "json"
+    is_clean_output = args.output in ["json", "adoc"]  # Both modes need clean output
 
-    if not is_json_output:
+    if not is_clean_output:
         console.print("\n[bold blue]AI Summary Generation[/bold blue]")
 
     # Get repository data first
     showroom = await fetch_showroom_data(args)
 
     # Display detailed showroom information in verbose mode
-    if not is_json_output and args.output == "verbose":
+    if not is_clean_output and args.output == "verbose":
         display_showroom_details(showroom, args)
 
     # Generate AI summary
-    if not is_json_output:
+    if not is_clean_output:
         console.print("\n[blue]Generating AI summary...[/blue]")
 
     try:
         # Build the complete prompt
         system_prompt, user_content = build_showroom_summary_prompt(showroom, ShowroomSummary)
 
-        if args.verbose and not is_json_output:
+        if args.verbose and not is_clean_output:
             console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
             console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
 
-        # Process with LLM (disable verbose output for JSON mode)
+        # Process with LLM (disable verbose output for clean output modes)
         summary, success, metadata = await process_content_with_structured_output(
             content=user_content,
             model_class=ShowroomSummary,
@@ -248,7 +251,7 @@ async def handle_summary_command(args):
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
-            verbose=args.verbose and not is_json_output,
+            verbose=args.verbose and not is_clean_output,
         )
 
         if success and summary:
@@ -256,6 +259,19 @@ async def handle_summary_command(args):
                 # Clean JSON output for piping to jq
                 import json
                 print(json.dumps(summary.model_dump(), indent=2, ensure_ascii=False))
+            elif args.output == "adoc":
+                # Check if Jinja2 is available
+                if not check_jinja2_availability():
+                    print("Error: Jinja2 is required for AsciiDoc output. Install it with 'pip install jinja2'", file=sys.stderr)
+                    sys.exit(1)
+                
+                # Output AsciiDoc to stdout
+                extra_context = {
+                    "lab_name": showroom.lab_name,
+                    "git_url": showroom.git_url,
+                    "git_ref": showroom.git_ref,
+                }
+                output_basemodel_as_adoc(summary, extra_context)
             else:
                 # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Summary Generated Successfully![/bold green]")
@@ -269,8 +285,8 @@ async def handle_summary_command(args):
             showroom.summary_output = summary
 
         else:
-            if is_json_output:
-                # For JSON output, print error to stderr and exit
+            if is_clean_output:
+                # For clean output modes, print error to stderr and exit
                 print(f"Error: {metadata.get('error', 'Failed to generate summary')}", file=sys.stderr)
                 sys.exit(1)
             else:
@@ -280,8 +296,8 @@ async def handle_summary_command(args):
                 sys.exit(1)
 
     except Exception as e:
-        if is_json_output:
-            # For JSON output, print error to stderr and exit
+        if is_clean_output:
+            # For clean output modes, print error to stderr and exit
             print(f"Error: {str(e)}", file=sys.stderr)
             if args.verbose:
                 import traceback
@@ -315,30 +331,31 @@ async def handle_review_command(args):
 
     # Determine output mode
     is_json_output = args.output == "json"
+    is_clean_output = args.output in ["json", "adoc"]  # Both modes need clean output
 
-    if not is_json_output:
+    if not is_clean_output:
         console.print("\n[bold blue]AI Review Generation[/bold blue]")
 
     # Get repository data first
     showroom = await fetch_showroom_data(args)
 
     # Display detailed showroom information in verbose mode
-    if not is_json_output and args.output == "verbose":
+    if not is_clean_output and args.output == "verbose":
         display_showroom_details(showroom, args)
 
     # Generate AI review
-    if not is_json_output:
+    if not is_clean_output:
         console.print("\n[blue]Generating AI review...[/blue]")
 
     try:
         # Build the complete prompt
         system_prompt, user_content = build_showroom_review_prompt(showroom, ShowroomReview)
 
-        if args.verbose and not is_json_output:
+        if args.verbose and not is_clean_output:
             console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
             console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
 
-        # Process with LLM (disable verbose output for JSON mode)
+        # Process with LLM (disable verbose output for clean output modes)
         review, success, metadata = await process_content_with_structured_output(
             content=user_content,
             model_class=ShowroomReview,
@@ -346,7 +363,7 @@ async def handle_review_command(args):
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
-            verbose=args.verbose and not is_json_output,
+            verbose=args.verbose and not is_clean_output,
         )
 
         if success and review:
@@ -354,6 +371,19 @@ async def handle_review_command(args):
                 # Clean JSON output for piping to jq
                 import json
                 print(json.dumps(review.model_dump(), indent=2, ensure_ascii=False))
+            elif args.output == "adoc":
+                # Check if Jinja2 is available
+                if not check_jinja2_availability():
+                    print("Error: Jinja2 is required for AsciiDoc output. Install it with 'pip install jinja2'", file=sys.stderr)
+                    sys.exit(1)
+                
+                # Output AsciiDoc to stdout
+                extra_context = {
+                    "lab_name": showroom.lab_name,
+                    "git_url": showroom.git_url,
+                    "git_ref": showroom.git_ref,
+                }
+                output_basemodel_as_adoc(review, extra_context)
             else:
                 # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Review Generated Successfully![/bold green]")
@@ -367,8 +397,8 @@ async def handle_review_command(args):
             showroom.review_output = review
 
         else:
-            if is_json_output:
-                # For JSON output, print error to stderr and exit
+            if is_clean_output:
+                # For clean output modes, print error to stderr and exit
                 print(f"Error: {metadata.get('error', 'Failed to generate review')}", file=sys.stderr)
                 sys.exit(1)
             else:
@@ -378,8 +408,8 @@ async def handle_review_command(args):
                 sys.exit(1)
 
     except Exception as e:
-        if is_json_output:
-            # For JSON output, print error to stderr and exit
+        if is_clean_output:
+            # For clean output modes, print error to stderr and exit
             print(f"Error: {str(e)}", file=sys.stderr)
             if args.verbose:
                 import traceback
@@ -413,30 +443,31 @@ async def handle_description_command(args):
 
     # Determine output mode
     is_json_output = args.output == "json"
+    is_clean_output = args.output in ["json", "adoc"]  # Both modes need clean output
 
-    if not is_json_output:
+    if not is_clean_output:
         console.print("\n[bold blue]AI Description Generation[/bold blue]")
 
     # Get repository data first
     showroom = await fetch_showroom_data(args)
 
     # Display detailed showroom information in verbose mode
-    if not is_json_output and args.output == "verbose":
+    if not is_clean_output and args.output == "verbose":
         display_showroom_details(showroom, args)
 
     # Generate AI description
-    if not is_json_output:
+    if not is_clean_output:
         console.print("\n[blue]Generating AI catalog description...[/blue]")
 
     try:
         # Build the complete prompt
         system_prompt, user_content = build_showroom_description_prompt(showroom, CatalogDescription)
 
-        if args.verbose and not is_json_output:
+        if args.verbose and not is_clean_output:
             console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
             console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
 
-        # Process with LLM (disable verbose output for JSON mode)
+        # Process with LLM (disable verbose output for clean output modes)
         description, success, metadata = await process_content_with_structured_output(
             content=user_content,
             model_class=CatalogDescription,
@@ -444,7 +475,7 @@ async def handle_description_command(args):
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
-            verbose=args.verbose and not is_json_output,
+            verbose=args.verbose and not is_clean_output,
         )
 
         if success and description:
@@ -452,6 +483,19 @@ async def handle_description_command(args):
                 # Clean JSON output for piping to jq
                 import json
                 print(json.dumps(description.model_dump(), indent=2, ensure_ascii=False))
+            elif args.output == "adoc":
+                # Check if Jinja2 is available
+                if not check_jinja2_availability():
+                    print("Error: Jinja2 is required for AsciiDoc output. Install it with 'pip install jinja2'", file=sys.stderr)
+                    sys.exit(1)
+                
+                # Output AsciiDoc to stdout
+                extra_context = {
+                    "lab_name": showroom.lab_name,
+                    "git_url": showroom.git_url,
+                    "git_ref": showroom.git_ref,
+                }
+                output_basemodel_as_adoc(description, extra_context)
             else:
                 # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Description Generated Successfully![/bold green]")
@@ -465,8 +509,8 @@ async def handle_description_command(args):
             showroom.description_output = description
 
         else:
-            if is_json_output:
-                # For JSON output, print error to stderr and exit
+            if is_clean_output:
+                # For clean output modes, print error to stderr and exit
                 print(f"Error: {metadata.get('error', 'Failed to generate description')}", file=sys.stderr)
                 sys.exit(1)
             else:
@@ -476,8 +520,8 @@ async def handle_description_command(args):
                 sys.exit(1)
 
     except Exception as e:
-        if is_json_output:
-            # For JSON output, print error to stderr and exit
+        if is_clean_output:
+            # For clean output modes, print error to stderr and exit
             print(f"Error: {str(e)}", file=sys.stderr)
             if args.verbose:
                 import traceback
@@ -506,7 +550,7 @@ async def fetch_showroom_data(args):
         else:
             console.print("[red]Error: Repository URL is required[/red]")
             console.print("Usage: showroom-tool <command> <repo_url> [options]")
-            sys.exit(1)
+        sys.exit(1)
 
     if args.verbose and not is_json_output:
         console.print(f"[blue]Processing repository: {repo_url}[/blue]")
