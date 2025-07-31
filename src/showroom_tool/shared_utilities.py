@@ -16,7 +16,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from src.config.basemodels import ShowroomReview, ShowroomSummary
+from src.config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
 
 # Optional OpenAI imports for LLM functionality
 try:
@@ -550,6 +550,77 @@ CRITICAL INSTRUCTIONS:
     # Build enhanced system prompt
     system_prompt = build_enhanced_system_prompt(
         base_prompt, review_model, context_hints
+    )
+
+    # Format user content
+    user_content = format_showroom_content_for_prompt(showroom_data)
+
+    return system_prompt, user_content
+
+
+def save_description_to_workspace(
+    description: BaseModel, save_path: str = "workspace"
+) -> str:
+    """
+    Save a description BaseModel to the workspace with model information included.
+
+    Args:
+        description: BaseModel instance to save
+        save_path: Directory to save the file
+
+    Returns:
+        Path to the saved file
+    """
+    # Extract content type from the description (default to "showroom")
+    content_type = "showroom_description"
+
+    # Convert to dict for saving
+    description_dict = description.model_dump()
+
+    # Save using the existing function
+    return save_structured_output(description_dict, content_type, save_path)
+
+
+def build_showroom_description_prompt(
+    showroom_data,
+    description_model: type[BaseModel] = CatalogDescription,
+    base_prompt: str | None = None,
+    context_hints: dict[str, Any] | None = None,
+) -> tuple[str, str]:
+    """
+    Build complete system and user prompts for Showroom description generation.
+
+    Args:
+        showroom_data: Showroom BaseModel instance with the lab data
+        description_model: The description Pydantic model class (defaults to CatalogDescription)
+        base_prompt: Optional custom base prompt (uses default if not provided)
+        context_hints: Optional context hints to enhance the prompt
+
+    Returns:
+        Tuple of (system_prompt, user_content) ready for LLM processing
+    """
+    # Default base prompt for showroom description
+    if base_prompt is None:
+        base_prompt = """You are an expert technical catalog writer specializing in creating compelling catalog entries for Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and generate catalog descriptions that accurately represent the content and attract the right audience.
+
+ANALYSIS FOCUS:
+- Headline: Create a compelling, concise summary that captures the lab's core value proposition
+- Products: Identify specific Red Hat products that are explicitly covered or used in the lab
+- Audience: Determine 2-4 specific audiences who would benefit most from this content
+- Lab Benefits: Extract 3-6 key takeaways that participants will gain from completing the lab
+
+CRITICAL INSTRUCTIONS:
+- For headline: Make it compelling but accurate, avoid marketing hyperbole
+- For products: Only include Red Hat products that are explicitly mentioned or demonstrated
+- For audience: Be specific about roles, skill levels, and use cases (e.g., "DevOps engineers new to containers")
+- For lab bullets: Focus on concrete skills, knowledge, or outcomes participants will achieve
+- Keep bullets concise but specific - each should highlight a distinct value or learning outcome
+
+Write in a professional, informative tone that appeals to technical practitioners and decision-makers."""
+
+    # Build enhanced system prompt
+    system_prompt = build_enhanced_system_prompt(
+        base_prompt, description_model, context_hints
     )
 
     # Format user content

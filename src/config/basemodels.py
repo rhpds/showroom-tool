@@ -108,6 +108,27 @@ class ShowroomReview(BaseModel):
     )
 
 
+class CatalogDescription(BaseModel):
+    """Pydantic BaseModel for AI-generated catalog descriptions of Showroom labs."""
+
+    headline: str = Field(
+        ...,
+        description="Concise summary of the catalog item"
+    )
+    products: list[str] = Field(
+        ...,
+        description="List of Red Hat Products covered in the lab"
+    )
+    intended_audience_bullets: list[str] = Field(
+        ...,
+        description="2 to 4 audiences who would benefit"
+    )
+    lab_bullets: list[str] = Field(
+        ...,
+        description="3 to 6 short 1 liners of the key takeaways of the lab"
+    )
+
+
 class Showroom(BaseModel):
     """Pydantic BaseModel for lab and demo content from Showroom Git repositories."""
 
@@ -124,6 +145,9 @@ class Showroom(BaseModel):
     )
     review_output: ShowroomReview | None = Field(
         default=None, description="AI-generated review of the lab content"
+    )
+    description_output: CatalogDescription | None = Field(
+        default=None, description="AI-generated catalog description of the lab content"
     )
 
 

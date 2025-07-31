@@ -80,6 +80,38 @@ CRITICAL INSTRUCTIONS:
 - Maintain professional, constructive tone throughout"""
 
 
+# Base prompt for Showroom lab catalog description generation
+SHOWROOM_DESCRIPTION_BASE_PROMPT = """You are an expert technical catalog writer specializing in creating compelling catalog entries for Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and generate catalog descriptions that accurately represent the content and attract the right audience.
+
+Your description should focus on:
+- Creating an engaging headline that captures the lab's essence
+- Identifying specific Red Hat products covered in the content
+- Determining target audiences who would benefit from the lab
+- Extracting key learning outcomes and value propositions
+- Crafting concise, action-oriented bullet points that highlight benefits
+
+Provide clear, compelling descriptions that would help technical buyers, educators, and learners quickly understand the lab's value and determine if it's right for their needs. Focus on concrete outcomes and practical skills gained rather than generic marketing language."""
+
+
+# Specialized prompt for CatalogDescription generation
+SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT = """You are an expert technical catalog writer specializing in creating compelling catalog entries for Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and generate structured catalog descriptions.
+
+ANALYSIS FOCUS:
+- Headline: Create a compelling, concise summary that captures the lab's core value proposition
+- Products: Identify specific Red Hat products that are explicitly covered or used in the lab
+- Audience: Determine 2-4 specific audiences who would benefit most from this content
+- Lab Benefits: Extract 3-6 key takeaways that participants will gain from completing the lab
+
+CRITICAL INSTRUCTIONS:
+- For headline: Make it compelling but accurate, avoid marketing hyperbole
+- For products: Only include Red Hat products that are explicitly mentioned or demonstrated
+- For audience: Be specific about roles, skill levels, and use cases (e.g., "DevOps engineers new to containers")
+- For lab bullets: Focus on concrete skills, knowledge, or outcomes participants will achieve
+- Keep bullets concise but specific - each should highlight a distinct value or learning outcome
+
+Write in a professional, informative tone that appeals to technical practitioners and decision-makers."""
+
+
 def extract_field_descriptions(model_class: type[BaseModel]) -> str:
     """
     Extract field descriptions from a Pydantic model and format them with behavioral directives.
@@ -313,6 +345,59 @@ def build_showroom_review_generation_prompt(
     """
     system_prompt = build_showroom_review_structured_prompt(
         review_model, include_field_instructions
+    )
+
+    user_content = format_showroom_content_for_prompt(showroom_data)
+
+    return system_prompt, user_content
+
+
+def build_showroom_description_structured_prompt(
+    description_model: type[BaseModel],
+    include_field_instructions: bool = True
+) -> str:
+    """
+    Build a structured prompt specifically for CatalogDescription generation.
+
+    Args:
+        description_model: The CatalogDescription Pydantic model class
+        include_field_instructions: Whether to include field-specific instructions
+
+    Returns:
+        Complete system prompt for structured description generation
+    """
+    base_prompt = SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT
+
+    if include_field_instructions:
+        field_instructions = extract_field_descriptions(description_model)
+        if field_instructions:
+            enhanced_prompt = f"{base_prompt}\n\n{field_instructions}"
+        else:
+            enhanced_prompt = base_prompt
+    else:
+        enhanced_prompt = base_prompt
+
+    return enhanced_prompt
+
+
+def build_showroom_description_generation_prompt(
+    showroom_data,
+    description_model: type[BaseModel],
+    include_field_instructions: bool = True
+) -> tuple[str, str]:
+    """
+    Build complete system and user prompts for CatalogDescription generation.
+
+    Args:
+        showroom_data: Showroom BaseModel instance with the lab data
+        description_model: The CatalogDescription Pydantic model class
+        include_field_instructions: Whether to include field-specific instructions
+
+    Returns:
+        Tuple of (system_prompt, user_content) ready for LLM description generation
+    """
+    system_prompt = build_showroom_description_structured_prompt(
+        description_model, include_field_instructions
     )
 
     user_content = format_showroom_content_for_prompt(showroom_data)

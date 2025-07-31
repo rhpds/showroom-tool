@@ -367,6 +367,38 @@ review_summary: str = Field(..., description="3-4 sentence overall review summar
 - **After:** `summary`, `review` commands with `--show-prompt` flags
 - **Cleaner UX:** Users now have a consistent interface with dedicated prompt viewing within each command
 
+### ✅ 9.1 Add Description Generator - COMPLETED
+
+**User Story:** User wants a build a Catalog Entry for the Lab which accurately describes the item based on its showroom lab content
+
+**✅ Implemented:**
+
+- ✅ Created the CatalogDescription Pydantic BaseModel in `./src/config/basemodels.py`:
+```python
+headline: str = Field(..., description="Concise summary of the catalog item")
+products: list[str] = Field(..., description="List of Red Hat Products covered in the lab")
+intended_audience_bullets: list[str] = Field(..., description="2 to 4 audiences who would benefit")
+lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the key takeaways of the lab")
+```
+- ✅ Added `description_output: CatalogDescription | None` field to Showroom BaseModel for AI-generated descriptions
+- ✅ Extended `prompts.py` with description-specific prompt functions:
+  - ✅ `SHOWROOM_DESCRIPTION_BASE_PROMPT` and `SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT` constants
+  - ✅ `build_showroom_description_structured_prompt()` - builds structured description prompts
+  - ✅ `build_showroom_description_generation_prompt()` - complete description prompt pipeline
+- ✅ Extended `shared_utilities.py` with description-specific functions following summary/review patterns:
+  - ✅ `save_description_to_workspace()` - saves description outputs to workspace
+  - ✅ `build_showroom_description_prompt()` - builds complete description system prompts
+- ✅ Added `description` command to CLI with identical functionality to summary and review:
+  - ✅ Same command line options: `--repo`, `--ref`, `--verbose`, `--output`, `--llm-provider`, etc.
+  - ✅ Support for both verbose and JSON output modes
+  - ✅ Detailed showroom display in verbose mode
+  - ✅ AI-powered description generation with structured catalog fields
+  - ✅ Workspace saving functionality
+  - ✅ `--show-prompt` support for viewing description analysis templates
+- ✅ Complete LLM integration ready for production use
+
+
+
 
 ## ✅ Additional Enhancements Implemented
 
@@ -424,6 +456,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 7.3: Consistent verbose output format for fetch command
 - ✅ Requirement 8: AI-powered review capability with structured scoring and feedback
 - ✅ Requirement 8.1: Refactored and cleaned up CLI UI for better user experience
+- ✅ Requirement 9.1: AI-powered catalog description generation capability
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
@@ -438,28 +471,37 @@ showroom-tool summary https://github.com/example/my-showroom
 # AI-powered review generation with detailed scoring and feedback
 showroom-tool review https://github.com/example/my-showroom
 
+# AI-powered catalog description generation
+showroom-tool description https://github.com/example/my-showroom
+
 # With specific branch and verbose output  
 showroom-tool summary --repo https://github.com/example/my-showroom --ref develop --verbose
 showroom-tool review --repo https://github.com/example/my-showroom --ref develop --verbose
+showroom-tool description --repo https://github.com/example/my-showroom --ref develop --verbose
 
 # Clean JSON output for automation/piping
 showroom-tool summary https://github.com/example/my-showroom --output json | jq
 showroom-tool summary https://github.com/example/my-showroom --output json > summary.json
 showroom-tool review https://github.com/example/my-showroom --output json | jq
 showroom-tool review https://github.com/example/my-showroom --output json > review.json
+showroom-tool description https://github.com/example/my-showroom --output json | jq
+showroom-tool description https://github.com/example/my-showroom --output json > description.json
 
 # With LLM options
 showroom-tool summary https://github.com/example/my-showroom --llm-provider gemini --temperature 0.2
 showroom-tool review https://github.com/example/my-showroom --llm-provider openai --temperature 0.1
+showroom-tool description https://github.com/example/my-showroom --llm-provider gemini --temperature 0.1
 
 # Display AI prompt templates
 showroom-tool summary --show-prompt
 showroom-tool review --show-prompt
+showroom-tool description --show-prompt
 
 # Help
 showroom-tool --help
 showroom-tool summary --help
 showroom-tool review --help
+showroom-tool description --help
 ```
 
 **Production Ready**: Complete LLM integration with structured output, automation support, and professional CLI experience.
