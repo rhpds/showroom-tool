@@ -6,13 +6,17 @@ The tool processes content provided as one or more AsciiDoc files typically stor
 
 ## Features
 
+- **AI-Powered Analysis**: Generate summaries, reviews, and catalog descriptions using LLM
 - **Repository Processing**: Clone and analyze showroom repositories with intelligent caching
 - **Content Analysis**: Parse AsciiDoc modules and extract structured data
+- **Multi-Provider LLM Support**: Works with Gemini, OpenAI, and local LLM servers
+- **Structured Outputs**: JSON and verbose output modes for automation and human consumption
 - **Smart Caching**: Avoid repeated clones with automatic cache invalidation
 - **CLI Interface**: Easy-to-use command-line interface with rich, colorized output
 - **AsciiDoc Support**: Native support for AsciiDoc formatted content with header extraction
 - **Performance**: ~50% faster on subsequent runs thanks to intelligent caching
 - **Flexible Options**: Support for different git refs, custom cache directories, and cache control
+- **No Installation Required**: Use the wrapper script without `pip install`
 
 ## Quick Start
 
@@ -85,40 +89,119 @@ showroom-tool --help
 
 ## Usage
 
-### Basic Commands
+### Option 1: Quick Start (No Installation Required)
+
+If you prefer not to install the package, you can use the included wrapper script directly:
 
 ```bash
-# Analyze a repository (uses caching by default)
-showroom-tool https://github.com/example/my-showroom
+# Clone the repository
+git clone <repository-url>
+cd showroom-reviewer-pydantic
 
-# Use a specific branch or tag
-showroom-tool https://github.com/example/my-showroom --ref develop
+# Create virtual environment and install dependencies
+python3.12 -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install -r requirements.txt  # or pip install -r requirements.txt
 
-# Enable verbose output to see detailed processing
-showroom-tool https://github.com/example/my-showroom --verbose
+# Use the clean wrapper script syntax
+python showroom-tool.py --help
+python showroom-tool.py summary https://github.com/example/my-showroom
+python showroom-tool.py review https://github.com/example/my-showroom
+python showroom-tool.py description https://github.com/example/my-showroom
+```
 
-# Force fresh clone (disable caching)
-showroom-tool https://github.com/example/my-showroom --no-cache
+### Option 2: Installed Package Commands
 
-# Use custom cache directory
-showroom-tool https://github.com/example/my-showroom --cache-dir /tmp/my-cache
+After installation with `pip install -e .`, use the installed commands:
 
-# Alternative syntax
-showroom-tool --repo https://github.com/example/my-showroom --ref main --verbose
+```bash
+# AI-powered summary generation
+showroom-tool summary https://github.com/example/my-showroom
+
+# AI-powered review with scoring and feedback
+showroom-tool review https://github.com/example/my-showroom
+
+# AI-powered catalog description generation
+showroom-tool description https://github.com/example/my-showroom
+
+# Use specific branch or tag
+showroom-tool summary https://github.com/example/my-showroom --ref develop
+
+# Enable verbose output for detailed processing
+showroom-tool summary https://github.com/example/my-showroom --verbose
+
+# Clean JSON output for automation and piping
+showroom-tool summary https://github.com/example/my-showroom --output json | jq
+
+# View AI prompt templates
+showroom-tool summary --show-prompt
+showroom-tool review --show-prompt
+showroom-tool description --show-prompt
+```
+
+### LLM Configuration
+
+The tool supports multiple LLM providers and defaults to Google Gemini. Configure using environment variables:
+
+```bash
+# Google Gemini (default) - no additional setup needed for provider selection
+export GEMINI_API_KEY="your-gemini-api-key"
+
+# OpenAI
+export OPENAI_API_KEY="your-openai-api-key"
+
+# Local LLM server (OpenAI-compatible)
+export LOCAL_OPENAI_API_KEY="your-local-api-key"
+export LOCAL_OPENAI_BASE_URL="http://localhost:8000/v1"
+export LOCAL_OPENAI_MODEL="your-local-model"
+
+# Optional: Customize model and temperature
+export GEMINI_MODEL="gemini-2.0-flash-exp"  # default
+export OPENAI_MODEL="gpt-4o-2024-08-06"     # default
+export LLM_TEMPERATURE="0.1"                # default
+```
+
+Choose your LLM provider with command line options:
+```bash
+# Use specific provider
+python showroom-tool.py summary <repo-url> --llm-provider gemini
+python showroom-tool.py summary <repo-url> --llm-provider openai
+python showroom-tool.py summary <repo-url> --llm-provider local
 ```
 
 ### Example Output
 
 ```
-Showroom Lab Summary:
-  Name: Summit 2025 - LB2906 - Getting Started with Llamastack
-  URL: https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git
-  Ref: main
-  Modules: 9
-    1. AI Applications and Llama Stack: A practical workshop [index.adoc] (615 words, 14 lines)
-    2. Module 1: Getting Started [01-Getting-Started.adoc] (1553 words, 230 lines)
-    3. Module 2: Llama Stack Inference Basics [02_Lllamastack_Inference_Basics.adoc] (499 words, 34 lines)
-    ...
+📚 Showroom Lab Details
+============================================================
+Lab Name: Summit 2025 - LB2906 - Getting Started with Llamastack
+Git Repository: https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git
+Git Reference: main
+Total Modules: 9
+
+📖 Module Breakdown
+------------------------------------------------------------
+   1. AI Applications and Llama Stack: A practical workshop
+      File: index.adoc | 615 words | 14 lines
+   2. Module 1: Getting Started
+      File: 01-Getting-Started.adoc | 1,553 words | 230 lines
+   3. Module 2: Llama Stack Inference Basics
+      File: 02_Lllamastack_Inference_Basics.adoc | 499 words | 34 lines
+   ...
+============================================================
+
+🤖 AI Analysis Results:
+{
+  "redhat_products": ["Red Hat OpenShift AI", "Llama Stack"],
+  "lab_audience": ["AI/ML developers", "Data scientists", "DevOps engineers"],
+  "lab_learning_objectives": [
+    "Set up and configure Llama Stack environment",
+    "Implement basic inference with Llama models",
+    "Build RAG applications with Llama Stack",
+    "Deploy AI applications on OpenShift"
+  ],
+  "lab_summary": "This hands-on lab introduces participants to Llama Stack..."
+}
 ```
 
 ### Caching System
@@ -240,9 +323,15 @@ showroom-tool <repo-url> --cache-dir /tmp/temp-cache
 ### Running as Python Module
 
 ```bash
-# Alternative execution methods
-python -m showroom_tool <repo-url>
-python -m showroom_tool --help
+# Method 1: Clean wrapper script (recommended)
+python showroom-tool.py --help
+python showroom-tool.py summary https://github.com/example/my-showroom
+python showroom-tool.py review https://github.com/example/my-showroom --verbose
+python showroom-tool.py description https://github.com/example/my-showroom --output json
+
+# Method 2: Direct module execution
+python -m src.showroom_tool summary https://github.com/example/my-showroom
+python -m src.showroom_tool --help
 ```
 
 ## Installation Troubleshooting
@@ -299,15 +388,19 @@ chmod +x ~/.local/bin/showroom-tool
 ✅ **Completed Features:**
 - Repository cloning and caching system
 - AsciiDoc content parsing and module extraction
-- Pydantic BaseModel data structures (`Showroom`, `ShowroomModule`)
+- Pydantic BaseModel data structures (`Showroom`, `ShowroomModule`, `ShowroomSummary`, `ShowroomReview`, `CatalogDescription`)
 - CLI with argument parsing and rich output
 - Git reference support (branches, tags, commits)
 - Comprehensive error handling
+- **AI-Powered Analysis**: Complete LLM integration with structured outputs
+- **Summary Generation**: Extract Red Hat products, audience, objectives, and summaries
+- **Review Capabilities**: Score and provide feedback on completeness, clarity, technical detail, usefulness, and business value
+- **Catalog Descriptions**: Generate compelling headlines, product lists, audience bullets, and key takeaways
+- **Multi-Provider LLM Support**: Gemini (default), OpenAI, and local LLM servers
+- **Output Formats**: Both JSON (for automation) and verbose (for humans) output modes
+- **Clean Usage Options**: Wrapper script for easy execution without installation
 
-🚀 **Ready for Next Phase:**
-- Content summarization capabilities
-- Review and validation features
-- Advanced analysis tools
+🎯 **Production Ready**: The tool is now a complete AI-powered analysis platform ready for technical enablement scenarios.
 
 ## License
 
@@ -324,5 +417,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Example Repository for Testing:**
 ```bash
-showroom-tool https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git --verbose
+# Using wrapper script (no installation required)
+python showroom-tool.py summary https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git --verbose
+
+# Using installed package
+showroom-tool summary https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git --verbose
+showroom-tool review https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git --output json
+showroom-tool description https://github.com/rhpds/showroom-summit2025-lb2960-llamastack.git
 ```
