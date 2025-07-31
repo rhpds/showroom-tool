@@ -413,19 +413,36 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
   - ✅ `--show-prompt` support for viewing description analysis templates
 - ✅ Complete LLM integration ready for production use
 
-### 9.2 Add Jinja 2 based template capability to be used via `--output adoc`
+### ✅ 9.2 Add Jinja 2 based template capability to be used via `--output adoc` - COMPLETED
 
 **User Story:** User wants to be able to generate human friendly outputs in asciidoc from BaseModels ie a description, summary, review capability
 
-**Tasks:**
+**✅ Implemented:**
 
-- Create a `./templates` directory for jinja templates
-- Created a `./src/showroom_tool/outputs.py`
-  - Create the necessary functions/classes to output when cli option is `--output adoc`:
-    - Consume the current base model ie whilst doing `showroom-tool summary | review | description ... --output adoc`
-    - Consume the matching Asciidoc template eg `CatalogDescription` BaseModel consumes `./templates/CatalogDescription.adoc.j2`
-    - Create a simple `./templates/CatalogDescription.adoc.j2` that simply lists the vars with example header and list elements
-    - stream the output to STDOUT
+- ✅ Create a `./templates` directory for jinja templates
+- ✅ Created a `./src/showroom_tool/outputs.py`
+  - ✅ Create the necessary functions/classes to output when cli option is `--output adoc`:
+    - ✅ Consume the current base model ie whilst doing `showroom-tool summary | review | description ... --output adoc`
+    - ✅ Consume the matching Asciidoc template eg `CatalogDescription` BaseModel consumes `./templates/CatalogDescription.adoc.j2`
+    - ✅ Create a simple `./templates/CatalogDescription.adoc.j2` that simply lists the vars with example header and list elements
+    - ✅ stream the output to STDOUT
+- ✅ Added jinja2>=3.0.0 dependency to pyproject.toml
+- ✅ Extended CLI --output argument choices to include "adoc"
+- ✅ Implemented template rendering for ShowroomSummary, ShowroomReview, and CatalogDescription
+- ✅ Added graceful error handling for missing Jinja2 dependency
+- ✅ Templates include lab metadata (name, git_url, git_ref) and timestamp
+
+**Usage Examples:**
+```bash
+# Generate AsciiDoc summary
+showroom-tool summary --repo https://github.com/example/lab --output adoc
+
+# Generate AsciiDoc review  
+showroom-tool review --repo https://github.com/example/lab --output adoc
+
+# Generate AsciiDoc catalog description
+showroom-tool description --repo https://github.com/example/lab --output adoc
+```
 
 
 ## ✅ Additional Enhancements Implemented
@@ -485,6 +502,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 8: AI-powered review capability with structured scoring and feedback
 - ✅ Requirement 8.1: Refactored and cleaned up CLI UI for better user experience
 - ✅ Requirement 9.1: AI-powered catalog description generation capability
+- ✅ Requirement 9.2: Jinja2-based AsciiDoc template output for human-friendly documentation
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
