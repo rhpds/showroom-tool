@@ -10,35 +10,7 @@ The Showroom Tool uses a sophisticated prompt assembly system that combines base
 
 The prompt assembly process follows a multi-layered approach to build comprehensive system prompts:
 
-```mermaid
-flowchart TD
-    A[User Initiates Command] --> B[Select Analysis Type]
-    B --> C{Analysis Type}
-    C -->|Summary| D[SHOWROOM_SUMMARY_STRUCTURED_PROMPT]
-    C -->|Review| E[SHOWROOM_REVIEW_STRUCTURED_PROMPT]
-    C -->|Description| F[SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT]
-    
-    D --> G[Base Prompt Template]
-    E --> G
-    F --> G
-    
-    G --> H[extract_field_descriptions()]
-    H --> I[Scan BaseModel Fields]
-    I --> J[Extract description Attribute]
-    J --> K[Generate Field-Specific Instructions]
-    K --> L[Apply Behavioral Boundaries]
-    
-    L --> M[build_enhanced_system_prompt()]
-    M --> N[Combine Base + Field Instructions]
-    N --> O[Add Context Hints if provided]
-    
-    O --> P[format_showroom_content_for_prompt()]
-    P --> Q[Format Lab Data as User Content]
-    
-    Q --> R[Final System + User Prompts]
-    R --> S[Send to LLM]
-    S --> T[Structured Response]
-```
+![Prompt Assembly Flow](images/prompt-flow.png)
 
 ## Key Components You Can Modify
 
