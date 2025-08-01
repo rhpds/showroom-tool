@@ -7,7 +7,7 @@ This module contains all Pydantic BaseModels used throughout the application
 for data validation and settings management.
 """
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -104,28 +104,67 @@ class ShowroomReview(BaseModel):
     )
     review_summary: str = Field(
         ...,
-        description="3-4 sentance overall review summary"
+        description="3-4 sentence overall review summary"
     )
 
 
 class CatalogDescription(BaseModel):
-    """Pydantic BaseModel for AI-generated catalog descriptions of Showroom labs."""
+    """
+    Pydantic BaseModel for AI-generated catalog descriptions of Showroom labs.
+   
+    Note:
+     The description fields are incorporated into the system prompt dynamically
+     so they can, and should, contain clear guidance for the AI to follow.
+
+    """
 
     headline: str = Field(
         ...,
-        description="Concise summary of the catalog item"
+        description="""
+        CONCISE and CLEAR summary of the catalog item, in 1-2 sentences.
+        First 115-120 characters are revealed on a thumbnail, so optimize for that.
+        YOUR GOAL is to make the headline as INFORMATIVE and ACCURATE as possible.
+        """
+    )
+    content_type: Literal["lab", "demo"] = Field(
+        ...,
+        description="""
+        Type of catalog item determined by the content and narrative: 'lab' OR 'demo'. NO other content types are allowed.
+        A lab is a hands-on lab with a specific learning objective.
+        A demo is a demo of a product or feature, typically intended to show a product or feature in action.
+        A demo is typically a one to many experience where a technical seller shows a product or feature to a customer.
+        """,
     )
     products: list[str] = Field(
         ...,
-        description="List of Red Hat Products covered in the lab"
+        description="""
+        List of Red Hat Products covered in the lab.
+        Highlight the most important products in the lab.
+        If the lab is not about a product, mention the product that is most relevant to the lab.
+        Limit to 3-5 products.
+        OMIT products that are not relevant to the lab.
+        """
     )
     intended_audience_bullets: list[str] = Field(
         ...,
-        description="2 to 4 audiences who would benefit"
+        description="""
+        2 to 4 audiences who would benefit from this type of content.
+        Typical audiences include:
+        - System Admins, often content focussed on Linux, RHEL, and possibly Ansible
+        - Cloud Admins, often content focussed on OpenShift, Kubernetes, and Public Cloud Providers such as AWS, Azure, and GCP
+        - DevOps Engineers, often content focussed on CI/CD, GitOps, and Observability, but can be more general
+        - Architects, often content focussed on the overall architecture of the solution
+        - Developers, often content focussed on coding and development of the solution versus infrastructure
+        - Data Scientists, often content focussed on data science, AI, ML, and DL 
+        AVOID making up random new audiences types, use the above as a guide
+        DO HIGHLIGHT key points for each audience type if appropriate.
+        """
     )
     lab_bullets: list[str] = Field(
         ...,
-        description="3 to 6 short 1 liners of the key takeaways of the lab"
+        description="""
+        3 to 6 short 1 liners of the key takeaways of the lab
+        """
     )
 
 

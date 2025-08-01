@@ -432,6 +432,35 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - ✅ Added graceful error handling for missing Jinja2 dependency
 - ✅ Templates include lab metadata (name, git_url, git_ref) and timestamp
 
+
+### 10.1 Improve cli consistency between `--show-prompt` and `--output` 
+
+**User Story:** User wants an improved UX, finds `--show-prompt` inconsistent with `--output`
+
+**Tasks:**
+
+- Change the flag `--show-prompt` to `--output-prompt`
+  - Ensure all documentations, comments etc are updated
+
+### 10.2 Document the Prompt Engineering Components
+
+**User Story:** User wants to be able to easily modify the overall prompt and needs documentation as to the flow and process and how for example they might guide the LLM to the correct value in say in a BaseModel
+
+**Tasks:**
+
+- Create a `./docs` directory
+- Create a `./docs/prompting-guide.md`
+  - Include the flow of how a prompt is assembled
+    - Include a mermaid diagram or similar
+  - Explain the key components that a developer or prompt engineer can modify
+  - Explain the role of the BaseModel `description` fields
+- Update the `README.md` to highlight this documentation
+
+
+
+
+
+
 **Usage Examples:**
 ```bash
 # Generate AsciiDoc summary
