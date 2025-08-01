@@ -370,9 +370,9 @@ review_summary: str = Field(..., description="3-4 sentence overall review summar
 
 - ✅ Removed redundant `showroom-tool fetch` command as fetch is implicit in both `summary` and `review`
 - ✅ Removed the standalone `prompt` command verb
-- ✅ Added `--show-prompt` argument to both `summary` and `review` commands:
-  - ✅ `showroom-tool summary --show-prompt` - displays summary analysis prompt template
-  - ✅ `showroom-tool review --show-prompt` - displays review analysis prompt template
+- ✅ Added `--output-prompt` argument to both `summary` and `review` commands:
+  - ✅ `showroom-tool summary --output-prompt` - displays summary analysis prompt template
+  - ✅ `showroom-tool review --output-prompt` - displays review analysis prompt template
 - ✅ Streamlined CLI to only two core commands: `summary` and `review`
 - ✅ Enhanced error handling for invalid/missing commands with helpful guidance
 - ✅ Updated command dispatcher and removed unused functions
@@ -380,7 +380,7 @@ review_summary: str = Field(..., description="3-4 sentence overall review summar
 
 **CLI Structure Changes:**
 - **Before:** `fetch`, `summary`, `review`, `prompt` commands
-- **After:** `summary`, `review` commands with `--show-prompt` flags
+- **After:** `summary`, `review` commands with `--output-prompt` flags
 - **Cleaner UX:** Users now have a consistent interface with dedicated prompt viewing within each command
 
 ### ✅ 9.1 Add Description Generator - COMPLETED
@@ -410,7 +410,7 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
   - ✅ Detailed showroom display in verbose mode
   - ✅ AI-powered description generation with structured catalog fields
   - ✅ Workspace saving functionality
-  - ✅ `--show-prompt` support for viewing description analysis templates
+  - ✅ `--output-prompt` support for viewing description analysis templates
 - ✅ Complete LLM integration ready for production use
 
 ### ✅ 9.2 Add Jinja 2 based template capability to be used via `--output adoc` - COMPLETED
@@ -433,14 +433,16 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - ✅ Templates include lab metadata (name, git_url, git_ref) and timestamp
 
 
-### 10.1 Improve cli consistency between `--show-prompt` and `--output` 
+### ✅ 10.1 Improve cli consistency between `--show-prompt` and `--output` - COMPLETED
 
 **User Story:** User wants an improved UX, finds `--show-prompt` inconsistent with `--output`
 
-**Tasks:**
+**✅ Implemented:**
 
-- Change the flag `--show-prompt` to `--output-prompt`
-  - Ensure all documentations, comments etc are updated
+- ✅ Changed the flag `--show-prompt` to `--output-prompt` for better CLI consistency
+- ✅ Updated all CLI argument definitions and help text
+- ✅ Updated all command handlers to use the new flag name
+- ✅ Updated all documentation, comments, and usage examples
 
 ### 10.2 Document the Prompt Engineering Components
 
@@ -532,6 +534,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 8.1: Refactored and cleaned up CLI UI for better user experience
 - ✅ Requirement 9.1: AI-powered catalog description generation capability
 - ✅ Requirement 9.2: Jinja2-based AsciiDoc template output for human-friendly documentation
+- ✅ Requirement 10.1: Improved CLI consistency with --output-prompt flag
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
@@ -568,9 +571,9 @@ showroom-tool review https://github.com/example/my-showroom --llm-provider opena
 showroom-tool description https://github.com/example/my-showroom --llm-provider gemini --temperature 0.1
 
 # Display AI prompt templates
-showroom-tool summary --show-prompt
-showroom-tool review --show-prompt
-showroom-tool description --show-prompt
+showroom-tool summary --output-prompt
+showroom-tool review --output-prompt
+showroom-tool description --output-prompt
 
 # Help
 showroom-tool --help

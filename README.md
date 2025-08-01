@@ -134,9 +134,9 @@ showroom-tool summary https://github.com/example/my-showroom --verbose
 showroom-tool summary https://github.com/example/my-showroom --output json | jq
 
 # View AI prompt templates
-showroom-tool summary --show-prompt
-showroom-tool review --show-prompt
-showroom-tool description --show-prompt
+showroom-tool summary --output-prompt
+showroom-tool review --output-prompt
+showroom-tool description --output-prompt
 ```
 
 ### LLM Configuration

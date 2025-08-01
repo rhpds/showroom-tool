@@ -192,7 +192,7 @@ def add_llm_arguments(parser):
         help="Temperature for LLM generation (default: 0.1)",
     )
     parser.add_argument(
-        "--show-prompt",
+        "--output-prompt",
         action="store_true",
         help="Display the AI prompt template instead of processing content",
     )
@@ -202,7 +202,7 @@ def add_llm_arguments(parser):
 async def handle_summary_command(args):
     """Handle the summary command to generate AI-powered summary."""
     # Check if user wants to see the prompt template
-    if args.show_prompt:
+    if args.output_prompt:
         console.print("\n[bold blue]AI Summary Prompt Template[/bold blue]")
         console.print("[blue]Displaying standard Showroom lab summary analysis prompt...[/blue]")
 
@@ -314,7 +314,7 @@ async def handle_summary_command(args):
 async def handle_review_command(args):
     """Handle the review command to generate AI-powered review."""
     # Check if user wants to see the prompt template
-    if args.show_prompt:
+    if args.output_prompt:
         console.print("\n[bold blue]AI Review Prompt Template[/bold blue]")
         console.print("[blue]Displaying standard Showroom lab review analysis prompt...[/blue]")
 
@@ -426,7 +426,7 @@ async def handle_review_command(args):
 async def handle_description_command(args):
     """Handle the description command to generate AI-powered catalog description."""
     # Check if user wants to see the prompt template
-    if args.show_prompt:
+    if args.output_prompt:
         console.print("\n[bold blue]AI Description Prompt Template[/bold blue]")
         console.print("[blue]Displaying standard Showroom lab description analysis prompt...[/blue]")
 
