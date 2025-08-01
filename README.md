@@ -402,6 +402,22 @@ chmod +x ~/.local/bin/showroom-tool
 
 🎯 **Production Ready**: The tool is now a complete AI-powered analysis platform ready for technical enablement scenarios.
 
+## Documentation
+
+### Prompt Engineering Guide
+
+For advanced users who want to customize AI behavior and understand how prompts are assembled:
+
+📖 **[Prompt Engineering Guide](docs/prompting-guide.md)** - Comprehensive guide covering:
+- How prompt assembly works (with flow diagrams)
+- Key components you can modify
+- Role of BaseModel description fields in guiding AI behavior
+- Best practices for customizing analysis types
+- Testing and debugging prompt changes
+- Advanced customization techniques
+
+This guide is essential for developers and prompt engineers who want to fine-tune the AI analysis behavior or create custom analysis types.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
