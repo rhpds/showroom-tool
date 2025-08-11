@@ -462,24 +462,25 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - ✅ Updated the `README.md` with prominent documentation section highlighting the prompt engineering guide
 
 
-### 11.1 Refactor LangGraph nodes for future extensability
+### ✅ 11.1 Refactor LangGraph nodes for future extensability - COMPLETED
 
 **User Story:** User wants to be able to easily extend the application via LangGraph in the future and finds the single node implementation constricting
 
-**Tasks:**
+**✅ Implemented:**
 
-- Refactor `graph_factory.py` so that the Graph now has a linear workflow through the graph
-  - Starting node `get_showroom` processes the `cli` args and populates the `Showroom` BaseModel
-  - Create a new node `process_showroom` to action the verb (`description | summary | review`)
-    - create the process_showroom function as the entry point
-  - Add a LangGraph Edge from `get_showroom` to the new node `process_showroom`
-  - Add a LangGraph Edge from `process_showroom` to `END`
-- Resulting code should simply flow as a workflow `get_showroom -> process_showroom -> END`
+- ✅ Refactored `src/showroom_tool/graph_factory.py` to a two-node linear workflow:
+  - ✅ `get_showroom`: fetches and populates the `Showroom` BaseModel from CLI-configured inputs
+  - ✅ `process_showroom`: executes the verb (`summary | review | description`) using LLM, returns structured output
+- ✅ Added edges: `get_showroom -> process_showroom -> END`
+- ✅ Extended `ShowroomState` with `command`, `llm_provider`, `model`, `temperature`
+- ✅ `graph_factory()` supports fetch-only or full processing; `process_showroom_with_graph()` accepts verb and LLM options
+- ✅ Updated CLI to use graph processing for `summary`, `review`, `description` commands
+- ✅ Maintained JSON/verbose/AsciiDoc output modes
 
 
 
 
-**Usage Examples:**
+**Usage Examples (unchanged):**
 ```bash
 # Generate AsciiDoc summary
 showroom-tool summary --repo https://github.com/example/lab --output adoc
