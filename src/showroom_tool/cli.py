@@ -165,6 +165,12 @@ def add_common_arguments(parser):
         help="Custom cache directory (default: ~/.showroom-tool/cache)",
     )
     parser.add_argument(
+        "--dir",
+        dest="local_dir",
+        default=None,
+        help="Path to a local Showroom repo directory (bypass git clone/cache)",
+    )
+    parser.add_argument(
         "--output",
         default="verbose",
         choices=["verbose", "json", "adoc"],
@@ -244,6 +250,7 @@ async def handle_summary_command(args):
             verbose=args.verbose and not is_clean_output,
             cache_dir=args.cache_dir,
             no_cache=args.no_cache,
+            local_dir=args.local_dir,
             command="summary",
             llm_provider=args.llm_provider,
             model=args.model,
@@ -341,6 +348,7 @@ async def handle_review_command(args):
             verbose=args.verbose and not is_clean_output,
             cache_dir=args.cache_dir,
             no_cache=args.no_cache,
+            local_dir=args.local_dir,
             command="review",
             llm_provider=args.llm_provider,
             model=args.model,
@@ -438,6 +446,7 @@ async def handle_description_command(args):
             verbose=args.verbose and not is_clean_output,
             cache_dir=args.cache_dir,
             no_cache=args.no_cache,
+            local_dir=args.local_dir,
             command="description",
             llm_provider=args.llm_provider,
             model=args.model,
@@ -498,17 +507,20 @@ async def fetch_showroom_data(args):
     # Determine the repository URL (from positional arg or --repo flag)
     repo_url = args.repo_url or args.repo
 
-    if not repo_url:
+    if not repo_url and not args.local_dir:
         if is_json_output:
-            print("Error: Repository URL is required", file=sys.stderr)
+            print("Error: Repository URL or --dir PATH is required", file=sys.stderr)
             sys.exit(1)
         else:
-            console.print("[red]Error: Repository URL is required[/red]")
-            console.print("Usage: showroom-tool <command> <repo_url> [options]")
+            console.print("[red]Error: Repository URL or --dir PATH is required[/red]")
+            console.print("Usage: showroom-tool <command> <repo_url> [options] or showroom-tool <command> --dir <PATH>")
         sys.exit(1)
 
     if args.verbose and not is_json_output:
-        console.print(f"[blue]Processing repository: {repo_url}[/blue]")
+        if args.local_dir:
+            console.print(f"[blue]Using local directory: {args.local_dir}[/blue]")
+        if repo_url:
+            console.print(f"[blue]Processing repository: {repo_url}[/blue]")
         console.print("[blue]Using LangGraph processing...[/blue]")
 
     # Import the LangGraph function
@@ -517,11 +529,12 @@ async def fetch_showroom_data(args):
     try:
         # For JSON output, suppress verbose output from LangGraph
         result = await process_showroom_with_graph(
-            git_url=repo_url,
+            git_url=repo_url or "",
             git_ref=args.ref,
             verbose=args.verbose and not is_json_output,
             cache_dir=args.cache_dir,
-            no_cache=args.no_cache
+            no_cache=args.no_cache,
+            local_dir=args.local_dir,
         )
 
         if not result.get("success", False):

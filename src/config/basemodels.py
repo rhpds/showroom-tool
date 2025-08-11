@@ -199,6 +199,10 @@ class ShowroomState(BaseModel):
     verbose: bool = Field(default=False, description="Enable verbose output")
     cache_dir: str | None = Field(default=None, description="Custom cache directory")
     no_cache: bool = Field(default=False, description="Disable caching and force fresh clone")
+    local_dir: str | None = Field(
+        default=None,
+        description="Optional local directory path to an already-cloned Showroom repo (bypasses git clone/caching)",
+    )
 
     # Processing verb and LLM options
     command: Literal["summary", "review", "description"] | None = Field(

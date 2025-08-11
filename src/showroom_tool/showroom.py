@@ -406,28 +406,46 @@ def read_module_content(pages_dir: Path, filename: str, verbose: bool = False) -
 # Main Showroom Processing Function
 
 def fetch_showroom_repository(
-    git_url: str,
+    git_url: str | None = None,
     git_ref: str = "main",
     verbose: bool = False,
     cache_dir: str | None = None,
     no_cache: bool = False,
+    local_dir: str | None = None,
 ) -> Showroom | None:
     """
     Fetch a showroom repository and parse it into a Showroom BaseModel.
 
     Args:
-        git_url: URL of the git repository
-        git_ref: Git reference to checkout (branch, tag, or commit)
+        git_url: URL of the git repository (omit if using local_dir)
+        git_ref: Git reference to checkout (ignored when using local_dir)
         verbose: Enable verbose output
         cache_dir: Custom cache directory (uses default if None)
         no_cache: Disable caching and force fresh clone
+        local_dir: Path to a pre-cloned local Showroom repository (no caching, no checkout)
 
     Returns:
         Populated Showroom instance or None on error
     """
 
-    # Get repository using caching system
-    repo_path = get_or_clone_repository(git_url, git_ref, cache_dir, no_cache, verbose)
+    # Determine repository path
+    if local_dir:
+        repo_path = Path(local_dir).resolve()
+        if not repo_path.exists() or not (repo_path / ".git").exists():
+            if verbose:
+                console.print(f"[red]Local directory is not a git repository: {repo_path}[/red]")
+            return None
+        if verbose:
+            console.print(f"[blue]Using local showroom repository at: {repo_path}[/blue]")
+        effective_git_url = str(repo_path)
+    else:
+        # Get repository using caching system
+        if not git_url:
+            if verbose:
+                console.print("[red]git_url is required when --dir is not provided[/red]")
+            return None
+        repo_path = get_or_clone_repository(git_url, git_ref, cache_dir, no_cache, verbose)
+        effective_git_url = git_url
 
     if repo_path is None:
         return None
@@ -485,7 +503,10 @@ def fetch_showroom_repository(
 
         # Create and return the Showroom instance
         showroom = Showroom(
-            lab_name=lab_name, git_url=git_url, git_ref=git_ref, modules=modules
+            lab_name=lab_name,
+            git_url=effective_git_url,
+            git_ref=git_ref if not local_dir else "(local)",
+            modules=modules,
         )
 
         if verbose:

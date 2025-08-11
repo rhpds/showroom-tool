@@ -43,7 +43,8 @@ async def get_showroom(state: ShowroomState) -> dict[str, Any]:
             git_ref=state.git_ref,
             verbose=state.verbose,
             cache_dir=state.cache_dir,
-            no_cache=state.no_cache
+            no_cache=state.no_cache,
+            local_dir=state.local_dir,
         )
 
         if showroom is None:
@@ -192,6 +193,7 @@ async def process_showroom_with_graph(
     verbose: bool = False,
     cache_dir: str | None = None,
     no_cache: bool = False,
+    local_dir: str | None = None,
     command: Literal["summary", "review", "description"] | None = None,
     llm_provider: str | None = None,
     model: str | None = None,
@@ -217,6 +219,7 @@ async def process_showroom_with_graph(
         verbose=verbose,
         cache_dir=cache_dir,
         no_cache=no_cache,
+        local_dir=local_dir,
         command=command,
         llm_provider=llm_provider,
         model=model,
