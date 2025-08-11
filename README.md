@@ -49,12 +49,11 @@ The tool processes content provided as one or more AsciiDoc files typically stor
 2. **Clone and install**:
    ```bash
    git clone <repository-url>
-   cd showroom-reviewer-pydantic
+   cd showroom-tool
 
    # Create virtual environment and install in one step
-   uv venv
+   uv sync
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   uv pip install -e .
    ```
 
 #### Option B: Using Standard Python/pip
@@ -62,7 +61,7 @@ The tool processes content provided as one or more AsciiDoc files typically stor
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd showroom-reviewer-pydantic
+   cd showroom-tool
    ```
 
 2. **Create and activate virtual environment**:
@@ -96,7 +95,7 @@ If you prefer not to install the package, you can use the included wrapper scrip
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd showroom-reviewer-pydantic
+cd showroom-tool
 
 # Create virtual environment and install dependencies
 python3.12 -m venv .venv
@@ -225,7 +224,7 @@ Cache is managed automatically, but you can control it:
 
 ```bash
 git clone <repository-url>
-cd showroom-reviewer-pydantic
+cd showroom-tool
 
 # Create development environment
 uv venv
@@ -240,7 +239,7 @@ uv pip install -e .
 
 ```bash
 git clone <repository-url>
-cd showroom-reviewer-pydantic
+cd showroom-tool
 
 # Create development environment
 python3.13 -m venv .venv
@@ -261,7 +260,7 @@ pip install -e .
 ### Project Structure
 
 ```
-showroom-reviewer-pydantic/
+showroom-tool/
 ├── src/                         # Source code (Python package layout)
 │   ├── showroom_tool/          # Main CLI package
 │   │   ├── __init__.py         # Package initialization
