@@ -461,12 +461,60 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
   - ✅ Performance considerations and troubleshooting tips
 - ✅ Updated the `README.md` with prominent documentation section highlighting the prompt engineering guide
 
+### ✅ 11.1 Refactor LangGraph nodes for future extensibility - COMPLETED
+
+**User Story:** User wants to be able to easily extend the application via LangGraph in the future and finds the single node implementation constricting
+
+**✅ Implemented:**
+
+- ✅ Refactored `src/showroom_tool/graph_factory.py` to a two-node linear workflow:
+  - ✅ `get_showroom`: fetches and populates the `Showroom` BaseModel from CLI-configured inputs
+  - ✅ `process_showroom`: executes the verb (`summary | review | description`) using LLM, returns structured output
+- ✅ Added edges: `get_showroom -> process_showroom -> END`
+- ✅ Extended `ShowroomState` with `command`, `llm_provider`, `model`, `temperature`
+- ✅ `graph_factory()` supports fetch-only or full processing; `process_showroom_with_graph()` accepts verb and LLM options
+- ✅ Updated CLI to use graph processing for `summary`, `review`, `description` commands
+- ✅ Maintained JSON/verbose/AsciiDoc output modes
+
+### ✅ 11.2 Add a local file option `--dir` for when the Showroom repo is already cloned locally - COMPLETED
+
+**User Story:** User wants to be able to run `showroom-tool` against a local copy of the repo to avoid having the commit/push to see the impact of their work.
+
+**✅ Implemented:**
+
+- ✅ Added CLI option `--dir <PATH>` allowing omission of git URL and using a local clone instead
+  - ✅ Supports absolute and relative paths to the repo root
+  - ✅ Ignores git ref/checkout (consumes repo "as is")
+  - ✅ Bypasses caching/cloning; uses the directory directly
+- ✅ Extended LangGraph `ShowroomState` with `local_dir` and plumbed through `get_showroom`
+- ✅ Updated `fetch_showroom_repository` to accept `local_dir` and validate `.git`
+- ✅ Enhanced CLI validation: require either `<repo_url>`/`--repo` or `--dir`; printed clear error messages when missing
+- ✅ All output modes (verbose/json/adoc) work unchanged
 
 
+### 11.3 Create a Release `0.1.0`
+
+**User Story:** User wants to be able to know which release of `showroom-tool` they are running
+
+**Tasks:**
+
+- Run ruff 
+- Commit all changes 
+- Merge current branch into main
+- Create a git tag `0.1.0`
+- Create a Release
+- Push to github
+  
+### 11.4 Add support for a `-V` and `--version` arg ie `showroom-tool --version`
+
+**User Story:** User wants to be able to know which release of `showroom-tool` they are running
+
+**Tasks:**
+
+- Add the processing for `-V` and `--version` to output the current Release version
 
 
-
-**Usage Examples:**
+**Usage Examples (unchanged):**
 ```bash
 # Generate AsciiDoc summary
 showroom-tool summary --repo https://github.com/example/lab --output adoc

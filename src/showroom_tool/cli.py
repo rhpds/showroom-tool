@@ -14,18 +14,17 @@ from rich.console import Console
 # Try to import from the installed package structure
 try:
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
-    from showroom_tool.outputs import output_basemodel_as_adoc, check_jinja2_availability
+    from showroom_tool.outputs import (
+        check_jinja2_availability,
+        output_basemodel_as_adoc,
+    )
     from showroom_tool.prompts import (
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
         build_showroom_summary_structured_prompt,
     )
     from showroom_tool.shared_utilities import (
-        build_showroom_description_prompt,
-        build_showroom_review_prompt,
-        build_showroom_summary_prompt,
         print_basemodel,
-        process_content_with_structured_output,
         save_description_to_workspace,
         save_review_to_workspace,
         save_summary_to_workspace,
@@ -36,18 +35,17 @@ except ImportError:
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
-    from showroom_tool.outputs import output_basemodel_as_adoc, check_jinja2_availability
+    from showroom_tool.outputs import (
+        check_jinja2_availability,
+        output_basemodel_as_adoc,
+    )
     from showroom_tool.prompts import (
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
         build_showroom_summary_structured_prompt,
     )
     from showroom_tool.shared_utilities import (
-        build_showroom_description_prompt,
-        build_showroom_review_prompt,
-        build_showroom_summary_prompt,
         print_basemodel,
-        process_content_with_structured_output,
         save_description_to_workspace,
         save_review_to_workspace,
         save_summary_to_workspace,
@@ -165,6 +163,12 @@ def add_common_arguments(parser):
         help="Custom cache directory (default: ~/.showroom-tool/cache)",
     )
     parser.add_argument(
+        "--dir",
+        dest="local_dir",
+        default=None,
+        help="Path to a local Showroom repo directory (bypass git clone/cache)",
+    )
+    parser.add_argument(
         "--output",
         default="verbose",
         choices=["verbose", "json", "adoc"],
@@ -236,64 +240,50 @@ async def handle_summary_command(args):
         console.print("\n[blue]Generating AI summary...[/blue]")
 
     try:
-        # Build the complete prompt
-        system_prompt, user_content = build_showroom_summary_prompt(showroom, ShowroomSummary)
+        from showroom_tool.graph_factory import process_showroom_with_graph
 
-        if args.verbose and not is_clean_output:
-            console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
-            console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
-
-        # Process with LLM (disable verbose output for clean output modes)
-        summary, success, metadata = await process_content_with_structured_output(
-            content=user_content,
-            model_class=ShowroomSummary,
-            system_prompt=system_prompt,
+        result = await process_showroom_with_graph(
+            git_url=showroom.git_url,
+            git_ref=showroom.git_ref,
+            verbose=args.verbose and not is_clean_output,
+            cache_dir=args.cache_dir,
+            no_cache=args.no_cache,
+            local_dir=args.local_dir,
+            command="summary",
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
-            verbose=args.verbose and not is_clean_output,
         )
 
-        if success and summary:
+        if result.get("success"):
+            structured = result.get("structured_output")
             if is_json_output:
-                # Clean JSON output for piping to jq
                 import json
-                print(json.dumps(summary.model_dump(), indent=2, ensure_ascii=False))
+                print(json.dumps(structured, indent=2, ensure_ascii=False))
             elif args.output == "adoc":
-                # Check if Jinja2 is available
                 if not check_jinja2_availability():
                     print("Error: Jinja2 is required for AsciiDoc output. Install it with 'pip install jinja2'", file=sys.stderr)
                     sys.exit(1)
-                
-                # Output AsciiDoc to stdout
                 extra_context = {
-                    "lab_name": showroom.lab_name,
-                    "git_url": showroom.git_url,
-                    "git_ref": showroom.git_ref,
+                    "lab_name": result.get("lab_name"),
+                    "git_url": result.get("git_url"),
+                    "git_ref": result.get("git_ref"),
                 }
+                summary = ShowroomSummary(**(structured or {}))
                 output_basemodel_as_adoc(summary, extra_context)
             else:
-                # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Summary Generated Successfully![/bold green]")
+                summary = ShowroomSummary(**(structured or {}))
                 print_basemodel(summary, "Showroom Summary")
-
-                # Save to workspace
                 saved_path = save_summary_to_workspace(summary)
                 console.print(f"\n[blue]💾 Summary saved to: {saved_path}[/blue]")
-
-            # Update the showroom object with the summary
-            showroom.summary_output = summary
-
         else:
+            err = result.get("error", "Failed to generate summary")
             if is_clean_output:
-                # For clean output modes, print error to stderr and exit
-                print(f"Error: {metadata.get('error', 'Failed to generate summary')}", file=sys.stderr)
-                sys.exit(1)
+                print(f"Error: {err}", file=sys.stderr)
             else:
-                console.print("\n[red]❌ Failed to generate AI summary[/red]")
-                if metadata.get("error"):
-                    console.print(f"[red]Error: {metadata['error']}[/red]")
-                sys.exit(1)
+                console.print(f"\n[red]❌ {err}[/red]")
+            sys.exit(1)
 
     except Exception as e:
         if is_clean_output:
@@ -348,64 +338,50 @@ async def handle_review_command(args):
         console.print("\n[blue]Generating AI review...[/blue]")
 
     try:
-        # Build the complete prompt
-        system_prompt, user_content = build_showroom_review_prompt(showroom, ShowroomReview)
+        from showroom_tool.graph_factory import process_showroom_with_graph
 
-        if args.verbose and not is_clean_output:
-            console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
-            console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
-
-        # Process with LLM (disable verbose output for clean output modes)
-        review, success, metadata = await process_content_with_structured_output(
-            content=user_content,
-            model_class=ShowroomReview,
-            system_prompt=system_prompt,
+        result = await process_showroom_with_graph(
+            git_url=showroom.git_url,
+            git_ref=showroom.git_ref,
+            verbose=args.verbose and not is_clean_output,
+            cache_dir=args.cache_dir,
+            no_cache=args.no_cache,
+            local_dir=args.local_dir,
+            command="review",
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
-            verbose=args.verbose and not is_clean_output,
         )
 
-        if success and review:
+        if result.get("success"):
+            structured = result.get("structured_output")
             if is_json_output:
-                # Clean JSON output for piping to jq
                 import json
-                print(json.dumps(review.model_dump(), indent=2, ensure_ascii=False))
+                print(json.dumps(structured, indent=2, ensure_ascii=False))
             elif args.output == "adoc":
-                # Check if Jinja2 is available
                 if not check_jinja2_availability():
                     print("Error: Jinja2 is required for AsciiDoc output. Install it with 'pip install jinja2'", file=sys.stderr)
                     sys.exit(1)
-                
-                # Output AsciiDoc to stdout
                 extra_context = {
-                    "lab_name": showroom.lab_name,
-                    "git_url": showroom.git_url,
-                    "git_ref": showroom.git_ref,
+                    "lab_name": result.get("lab_name"),
+                    "git_url": result.get("git_url"),
+                    "git_ref": result.get("git_ref"),
                 }
+                review = ShowroomReview(**(structured or {}))
                 output_basemodel_as_adoc(review, extra_context)
             else:
-                # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Review Generated Successfully![/bold green]")
+                review = ShowroomReview(**(structured or {}))
                 print_basemodel(review, "Showroom Review")
-
-                # Save to workspace
                 saved_path = save_review_to_workspace(review)
                 console.print(f"\n[blue]💾 Review saved to: {saved_path}[/blue]")
-
-            # Update the showroom object with the review
-            showroom.review_output = review
-
         else:
+            err = result.get("error", "Failed to generate review")
             if is_clean_output:
-                # For clean output modes, print error to stderr and exit
-                print(f"Error: {metadata.get('error', 'Failed to generate review')}", file=sys.stderr)
-                sys.exit(1)
+                print(f"Error: {err}", file=sys.stderr)
             else:
-                console.print("\n[red]❌ Failed to generate AI review[/red]")
-                if metadata.get("error"):
-                    console.print(f"[red]Error: {metadata['error']}[/red]")
-                sys.exit(1)
+                console.print(f"\n[red]❌ {err}[/red]")
+            sys.exit(1)
 
     except Exception as e:
         if is_clean_output:
@@ -460,64 +436,50 @@ async def handle_description_command(args):
         console.print("\n[blue]Generating AI catalog description...[/blue]")
 
     try:
-        # Build the complete prompt
-        system_prompt, user_content = build_showroom_description_prompt(showroom, CatalogDescription)
+        from showroom_tool.graph_factory import process_showroom_with_graph
 
-        if args.verbose and not is_clean_output:
-            console.print(f"[dim]System prompt length: {len(system_prompt)} characters[/dim]")
-            console.print(f"[dim]User content length: {len(user_content)} characters[/dim]")
-
-        # Process with LLM (disable verbose output for clean output modes)
-        description, success, metadata = await process_content_with_structured_output(
-            content=user_content,
-            model_class=CatalogDescription,
-            system_prompt=system_prompt,
+        result = await process_showroom_with_graph(
+            git_url=showroom.git_url,
+            git_ref=showroom.git_ref,
+            verbose=args.verbose and not is_clean_output,
+            cache_dir=args.cache_dir,
+            no_cache=args.no_cache,
+            local_dir=args.local_dir,
+            command="description",
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
-            verbose=args.verbose and not is_clean_output,
         )
 
-        if success and description:
+        if result.get("success"):
+            structured = result.get("structured_output")
             if is_json_output:
-                # Clean JSON output for piping to jq
                 import json
-                print(json.dumps(description.model_dump(), indent=2, ensure_ascii=False))
+                print(json.dumps(structured, indent=2, ensure_ascii=False))
             elif args.output == "adoc":
-                # Check if Jinja2 is available
                 if not check_jinja2_availability():
                     print("Error: Jinja2 is required for AsciiDoc output. Install it with 'pip install jinja2'", file=sys.stderr)
                     sys.exit(1)
-                
-                # Output AsciiDoc to stdout
                 extra_context = {
-                    "lab_name": showroom.lab_name,
-                    "git_url": showroom.git_url,
-                    "git_ref": showroom.git_ref,
+                    "lab_name": result.get("lab_name"),
+                    "git_url": result.get("git_url"),
+                    "git_ref": result.get("git_ref"),
                 }
+                description = CatalogDescription(**(structured or {}))
                 output_basemodel_as_adoc(description, extra_context)
             else:
-                # Verbose console output (current behavior)
                 console.print("\n[bold green]✅ AI Description Generated Successfully![/bold green]")
+                description = CatalogDescription(**(structured or {}))
                 print_basemodel(description, "Catalog Description")
-
-                # Save to workspace
                 saved_path = save_description_to_workspace(description)
                 console.print(f"\n[blue]💾 Description saved to: {saved_path}[/blue]")
-
-            # Update the showroom object with the description
-            showroom.description_output = description
-
         else:
+            err = result.get("error", "Failed to generate description")
             if is_clean_output:
-                # For clean output modes, print error to stderr and exit
-                print(f"Error: {metadata.get('error', 'Failed to generate description')}", file=sys.stderr)
-                sys.exit(1)
+                print(f"Error: {err}", file=sys.stderr)
             else:
-                console.print("\n[red]❌ Failed to generate AI description[/red]")
-                if metadata.get("error"):
-                    console.print(f"[red]Error: {metadata['error']}[/red]")
-                sys.exit(1)
+                console.print(f"\n[red]❌ {err}[/red]")
+            sys.exit(1)
 
     except Exception as e:
         if is_clean_output:
@@ -543,17 +505,20 @@ async def fetch_showroom_data(args):
     # Determine the repository URL (from positional arg or --repo flag)
     repo_url = args.repo_url or args.repo
 
-    if not repo_url:
+    if not repo_url and not args.local_dir:
         if is_json_output:
-            print("Error: Repository URL is required", file=sys.stderr)
+            print("Error: Repository URL or --dir PATH is required", file=sys.stderr)
             sys.exit(1)
         else:
-            console.print("[red]Error: Repository URL is required[/red]")
-            console.print("Usage: showroom-tool <command> <repo_url> [options]")
+            console.print("[red]Error: Repository URL or --dir PATH is required[/red]")
+            console.print("Usage: showroom-tool <command> <repo_url> [options] or showroom-tool <command> --dir <PATH>")
         sys.exit(1)
 
     if args.verbose and not is_json_output:
-        console.print(f"[blue]Processing repository: {repo_url}[/blue]")
+        if args.local_dir:
+            console.print(f"[blue]Using local directory: {args.local_dir}[/blue]")
+        if repo_url:
+            console.print(f"[blue]Processing repository: {repo_url}[/blue]")
         console.print("[blue]Using LangGraph processing...[/blue]")
 
     # Import the LangGraph function
@@ -562,11 +527,12 @@ async def fetch_showroom_data(args):
     try:
         # For JSON output, suppress verbose output from LangGraph
         result = await process_showroom_with_graph(
-            git_url=repo_url,
+            git_url=repo_url or "",
             git_ref=args.ref,
             verbose=args.verbose and not is_json_output,
             cache_dir=args.cache_dir,
-            no_cache=args.no_cache
+            no_cache=args.no_cache,
+            local_dir=args.local_dir,
         )
 
         if not result.get("success", False):

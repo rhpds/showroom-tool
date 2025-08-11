@@ -35,24 +35,24 @@ def get_template_directory() -> Path:
     """Get the path to the templates directory."""
     # Check if we're in development or installed mode
     current_file = Path(__file__)
-    
+
     # Try project root (development mode)
     project_root = current_file.parent.parent.parent
     templates_dir = project_root / "templates"
-    
+
     if templates_dir.exists():
         return templates_dir
-    
+
     # Try relative to current module (installed mode)
     templates_dir = current_file.parent / "templates"
     if templates_dir.exists():
         return templates_dir
-        
+
     # Fallback to current directory
     templates_dir = Path.cwd() / "templates"
     if templates_dir.exists():
         return templates_dir
-    
+
     raise FileNotFoundError(
         f"Could not find templates directory. Searched: "
         f"{project_root / 'templates'}, {current_file.parent / 'templates'}, "
@@ -66,7 +66,7 @@ def get_jinja_environment():  # type: ignore
         raise ImportError(
             "Jinja2 is required for AsciiDoc output. Install it with 'pip install jinja2'"
         )
-    
+
     templates_dir = get_template_directory()
     # We know Environment is available here because JINJA2_AVAILABLE is True
     return Environment(  # type: ignore
@@ -78,31 +78,31 @@ def get_jinja_environment():  # type: ignore
 
 
 def render_basemodel_to_adoc(
-    model: BaseModel, 
+    model: BaseModel,
     template_name: str | None = None,
     extra_context: dict[str, Any] | None = None
 ) -> str:
     """
     Render a Pydantic BaseModel to AsciiDoc using a Jinja2 template.
-    
+
     Args:
         model: The Pydantic BaseModel instance to render
         template_name: Optional template name. If not provided, uses model class name + '.adoc.j2'
         extra_context: Additional context variables for the template
-        
+
     Returns:
         Rendered AsciiDoc content as string
-        
+
     Raises:
         ImportError: If Jinja2 is not available
         FileNotFoundError: If template file is not found
     """
     env = get_jinja_environment()
-    
+
     # Determine template name
     if template_name is None:
         template_name = f"{model.__class__.__name__}.adoc.j2"
-    
+
     # Load template
     try:
         template = env.get_template(template_name)
@@ -110,18 +110,18 @@ def render_basemodel_to_adoc(
         raise FileNotFoundError(
             f"Could not load template '{template_name}': {e}"
         ) from e
-    
+
     # Prepare context
     context = {
         **model.model_dump(),
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "model_type": model.__class__.__name__,
     }
-    
+
     # Add extra context if provided
     if extra_context:
         context.update(extra_context)
-    
+
     # Render template
     return template.render(**context)
 
@@ -142,15 +142,15 @@ def render_description_to_adoc(description: CatalogDescription, extra_context: d
 
 
 def output_basemodel_as_adoc(
-    model: BaseModel, 
+    model: BaseModel,
     extra_context: dict[str, Any] | None = None
 ) -> None:
     """
     Output a BaseModel as AsciiDoc to stdout.
-    
+
     This function automatically detects the model type and uses the appropriate
     rendering function.
-    
+
     Args:
         model: The Pydantic BaseModel instance to output
         extra_context: Additional context variables for the template
@@ -165,7 +165,7 @@ def output_basemodel_as_adoc(
     else:
         # Fallback to generic rendering
         adoc_content = render_basemodel_to_adoc(model, extra_context=extra_context)
-    
+
     # Output to stdout
     print(adoc_content)
 
