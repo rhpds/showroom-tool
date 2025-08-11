@@ -492,7 +492,7 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - ✅ All output modes (verbose/json/adoc) work unchanged
 
 
-### 11.3 Create a Release `0.1.0`
+### ✅ 11.3 Create a Release `0.1.0` - COMPLETED
 
 **User Story:** User wants to be able to know which release of `showroom-tool` they are running
 
@@ -503,9 +503,22 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - Merge current branch into main
 - Create a git tag `0.1.0`
 - Create a Release
-- Push to github
-  
-### 11.4 Add support for a `-V` and `--version` arg ie `showroom-tool --version`
+- Push to GitHub
+
+### ✅ 11.5 Add tests with `pytest` where appropriate - COMPLETED
+
+**User Story:** User wants to ensure the growing repo has adequate testing before extending
+
+**✅ Implemented:**
+
+- ✅ Added tests in `tests/`:
+  - ✅ Graph fetch-only flow (`tests/test_graph_factory.py`)
+  - ✅ Local directory showroom fetch (`tests/test_showroom_fetch_local_dir.py`)
+  - ✅ Outputs module availability (`tests/test_outputs.py`)
+- ✅ Verified `uv run pytest -q` runs cleanly
+
+
+### 11.6 Add support for a `-V` and `--version` arg ie `showroom-tool --version`
 
 **User Story:** User wants to be able to know which release of `showroom-tool` they are running
 
