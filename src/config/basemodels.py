@@ -111,7 +111,7 @@ class ShowroomReview(BaseModel):
 class CatalogDescription(BaseModel):
     """
     Pydantic BaseModel for AI-generated catalog descriptions of Showroom labs.
-   
+
     Note:
      The description fields are incorporated into the system prompt dynamically
      so they can, and should, contain clear guidance for the AI to follow.
@@ -155,7 +155,7 @@ class CatalogDescription(BaseModel):
         - DevOps Engineers, often content focussed on CI/CD, GitOps, and Observability, but can be more general
         - Architects, often content focussed on the overall architecture of the solution
         - Developers, often content focussed on coding and development of the solution versus infrastructure
-        - Data Scientists, often content focussed on data science, AI, ML, and DL 
+        - Data Scientists, often content focussed on data science, AI, ML, and DL
         AVOID making up random new audiences types, use the above as a guide
         DO HIGHLIGHT key points for each audience type if appropriate.
         """

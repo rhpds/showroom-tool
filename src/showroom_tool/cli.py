@@ -14,18 +14,17 @@ from rich.console import Console
 # Try to import from the installed package structure
 try:
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
-    from showroom_tool.outputs import output_basemodel_as_adoc, check_jinja2_availability
+    from showroom_tool.outputs import (
+        check_jinja2_availability,
+        output_basemodel_as_adoc,
+    )
     from showroom_tool.prompts import (
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
         build_showroom_summary_structured_prompt,
     )
     from showroom_tool.shared_utilities import (
-        build_showroom_description_prompt,
-        build_showroom_review_prompt,
-        build_showroom_summary_prompt,
         print_basemodel,
-        process_content_with_structured_output,
         save_description_to_workspace,
         save_review_to_workspace,
         save_summary_to_workspace,
@@ -36,18 +35,17 @@ except ImportError:
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
-    from showroom_tool.outputs import output_basemodel_as_adoc, check_jinja2_availability
+    from showroom_tool.outputs import (
+        check_jinja2_availability,
+        output_basemodel_as_adoc,
+    )
     from showroom_tool.prompts import (
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
         build_showroom_summary_structured_prompt,
     )
     from showroom_tool.shared_utilities import (
-        build_showroom_description_prompt,
-        build_showroom_review_prompt,
-        build_showroom_summary_prompt,
         print_basemodel,
-        process_content_with_structured_output,
         save_description_to_workspace,
         save_review_to_workspace,
         save_summary_to_workspace,

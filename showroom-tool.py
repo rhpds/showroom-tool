@@ -12,10 +12,10 @@ def main():
     # Add src to Python path so we can import from the package structure
     project_root = Path(__file__).parent
     src_path = project_root / "src"
-    
+
     # Insert at the beginning to ensure our modules take precedence
     sys.path.insert(0, str(src_path))
-    
+
     try:
         from showroom_tool.cli import main as cli_main
         cli_main()

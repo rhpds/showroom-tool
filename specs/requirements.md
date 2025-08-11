@@ -492,7 +492,20 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - ✅ All output modes (verbose/json/adoc) work unchanged
 
 
-### 11.3 Add support for a `-V` and `--version` arg ie `showroom-tool --version`
+### 11.3 Create a Release `0.1.0`
+
+**User Story:** User wants to be able to know which release of `showroom-tool` they are running
+
+**Tasks:**
+
+- Run ruff 
+- Commit all changes 
+- Merge current branch into main
+- Create a git tag `0.1.0`
+- Create a Release
+- Push to github
+  
+### 11.4 Add support for a `-V` and `--version` arg ie `showroom-tool --version`
 
 **User Story:** User wants to be able to know which release of `showroom-tool` they are running
 
