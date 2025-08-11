@@ -14,6 +14,7 @@ from rich.console import Console
 # Try to import from the installed package structure
 try:
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    from showroom_tool import __version__
     from showroom_tool.outputs import (
         check_jinja2_availability,
         output_basemodel_as_adoc,
@@ -35,6 +36,7 @@ except ImportError:
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root))
     from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    from showroom_tool import __version__
     from showroom_tool.outputs import (
         check_jinja2_availability,
         output_basemodel_as_adoc,
@@ -114,6 +116,14 @@ def parse_arguments() -> argparse.Namespace:
         description="Showroom Tool - CLI for summarizing, reviewing, and validating technical lab content",
         epilog="Examples:\n  showroom-tool summary https://github.com/example/my-lab\n  showroom-tool review https://github.com/example/my-lab\n  showroom-tool description https://github.com/example/my-lab",
         formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    # Global version flag
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="store_true",
+        help="Show the showroom-tool version and exit",
     )
 
     # Add subcommands
@@ -567,6 +577,11 @@ async def fetch_showroom_data(args):
 async def main_async():
     """Main CLI entry point using LangGraph."""
     args = parse_arguments()
+
+    # Handle version output
+    if getattr(args, "version", False):
+        print(f"showroom-tool {__version__}")
+        return
 
     # Handle different commands
     if args.command == "summary":

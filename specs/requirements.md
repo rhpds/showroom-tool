@@ -518,13 +518,15 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - ✅ Verified `uv run pytest -q` runs cleanly
 
 
-### 11.6 Add support for a `-V` and `--version` arg ie `showroom-tool --version`
+### ✅ 11.6 Add support for a `-V` and `--version` arg ie `showroom-tool --version` - COMPLETED
 
 **User Story:** User wants to be able to know which release of `showroom-tool` they are running
 
-**Tasks:**
+**✅ Implemented:**
 
-- Add the processing for `-V` and `--version` to output the current Release version
+- ✅ Introduced `showroom_tool.__version__` (sourced from `src/showroom_tool/__init__.py`)
+- ✅ Added global flags `-V` and `--version` to print version and exit
+- ✅ Example: `showroom-tool --version` → `showroom-tool 0.1.0`
 
 
 **Usage Examples (unchanged):**
