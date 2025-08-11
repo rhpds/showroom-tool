@@ -462,6 +462,19 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 - ✅ Updated the `README.md` with prominent documentation section highlighting the prompt engineering guide
 
 
+### 11.1 Refactor LangGraph nodes for future extensability
+
+**User Story:** User wants to be able to easily extend the application via LangGraph in the future and finds the single node implementation constricting
+
+**Tasks:**
+
+- Refactor `graph_factory.py` so that the Graph now has a linear workflow through the graph
+  - Starting node `get_showroom` processes the `cli` args and populates the `Showroom` BaseModel
+  - Create a new node `process_showroom` to action the verb (`description | summary | review`)
+    - create the process_showroom function as the entry point
+  - Add a LangGraph Edge from `get_showroom` to the new node `process_showroom`
+  - Add a LangGraph Edge from `process_showroom` to `END`
+- Resulting code should simply flow as a workflow `get_showroom -> process_showroom -> END`
 
 
 

@@ -193,11 +193,25 @@ class Showroom(BaseModel):
 class ShowroomState(BaseModel):
     """LangGraph state for processing Showroom repositories."""
 
+    # Repo fetch inputs
     git_url: str = Field(..., description="The URL of the Showroom Git repository")
     git_ref: str = Field(default="main", description="The git tag or branch to use")
     verbose: bool = Field(default=False, description="Enable verbose output")
     cache_dir: str | None = Field(default=None, description="Custom cache directory")
     no_cache: bool = Field(default=False, description="Disable caching and force fresh clone")
+
+    # Processing verb and LLM options
+    command: Literal["summary", "review", "description"] | None = Field(
+        default=None,
+        description="Verb to process after fetching showroom data: 'summary' | 'review' | 'description'",
+    )
+    llm_provider: str | None = Field(
+        default=None, description="LLM provider identifier (e.g., openai, gemini, local)"
+    )
+    model: str | None = Field(default=None, description="LLM model name")
+    temperature: float | None = Field(
+        default=None, description="Temperature for LLM generation"
+    )
 
     # Processing results
     showroom: Showroom | None = Field(default=None, description="The processed Showroom data")
