@@ -274,12 +274,6 @@ lab_summary: str = Field(..., description="An objective 5 to 6 sentence summary 
   - ✅ Beautiful console formatting with emojis and colors
   - ✅ Only displays in verbose mode, hidden in JSON mode
 
-### ✅ 7.2 Add more detail to `--output verbose` - COMPLETED
-
-**User Story:** User wants a clear understanding of the lab and modules including name, word and line count from the showroom loading stage
-
-**✅ Implemented:**
-
 ### ✅ 7.3 Reuse the `--output verbose` option with `showroom-tool fetch` - COMPLETED
 
 **User Story:** User wants consistent outputs for similar operations
@@ -496,14 +490,34 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
 
 **User Story:** User wants to be able to know which release of `showroom-tool` they are running
 
-**Tasks:**
+**✅ Implemented:**
 
-- Run ruff 
-- Commit all changes 
-- Merge current branch into main
-- Create a git tag `0.1.0`
-- Create a Release
-- Push to GitHub
+- ✅ Ran ruff and ensured clean linting
+- ✅ Committed all changes and merged feature branch into `main`
+- ✅ Created git tag and GitHub release
+
+**Release Checklist (example commands):**
+
+```bash
+# Ensure clean working tree
+git status
+
+# Run quality checks
+uv run ruff check . --fix
+
+# Merge feature into main (from feature branch)
+git checkout main
+git pull
+# If using a feature branch
+git merge --no-ff feature/optional-prompt-file -m "Merge feature: prompts overrides and versioned outputs"
+
+# Tag and push
+git tag -a v0.1.0 -m "showroom-tool 0.1.0"
+git push origin main --tags
+
+# Create GitHub release (manual via UI or gh CLI)
+# gh release create v0.1.0 --title "showroom-tool 0.1.0" --notes "Initial release"
+```
 
 ### ✅ 11.5 Add tests with `pytest` where appropriate - COMPLETED
 
