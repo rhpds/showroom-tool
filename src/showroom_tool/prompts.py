@@ -4,11 +4,18 @@
 Prompt building utilities for Showroom AI summarization.
 
 This module contains prompts and utilities for generating AI-powered
-summaries of Showroom lab content using structured prompts.
+summaries, reviews, and descriptions of Showroom lab content using
+structured prompts.
+
+Requirement 11.9: Supports loading prompt and temperature overrides from
+an external file via `--prompts-file`.
 """
 
+import json
 import os
-from typing import Literal
+import importlib.util
+from pathlib import Path
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -164,6 +171,35 @@ CRITICAL: Each field has its own FOCUS, IGNORE, and ACT LIKE instructions. Apply
         return ""
 
 
+def _get_override(name: str, default_value: Any) -> Any:
+    """Get override value if present, otherwise return default."""
+    return PROMPTS_FILE_OVERRIDES.get(name, default_value)
+
+
+def get_summary_base_prompt() -> str:
+    return _get_override("SHOWROOM_SUMMARY_BASE_PROMPT", SHOWROOM_SUMMARY_BASE_PROMPT)
+
+
+def get_summary_structured_prompt() -> str:
+    return _get_override("SHOWROOM_SUMMARY_STRUCTURED_PROMPT", SHOWROOM_SUMMARY_STRUCTURED_PROMPT)
+
+
+def get_review_base_prompt() -> str:
+    return _get_override("SHOWROOM_REVIEW_BASE_PROMPT", SHOWROOM_REVIEW_BASE_PROMPT)
+
+
+def get_review_structured_prompt() -> str:
+    return _get_override("SHOWROOM_REVIEW_STRUCTURED_PROMPT", SHOWROOM_REVIEW_STRUCTURED_PROMPT)
+
+
+def get_description_base_prompt() -> str:
+    return _get_override("SHOWROOM_DESCRIPTION_BASE_PROMPT", SHOWROOM_DESCRIPTION_BASE_PROMPT)
+
+
+def get_description_structured_prompt() -> str:
+    return _get_override("SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT", SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT)
+
+
 def build_showroom_summary_prompt(
     showroom_model: type[BaseModel],
     include_field_instructions: bool = True
@@ -178,7 +214,7 @@ def build_showroom_summary_prompt(
     Returns:
         Complete system prompt for LLM summarization
     """
-    base_prompt = SHOWROOM_SUMMARY_BASE_PROMPT
+    base_prompt = get_summary_base_prompt()
 
     if include_field_instructions:
         field_instructions = extract_field_descriptions(showroom_model)
@@ -206,7 +242,7 @@ def build_showroom_summary_structured_prompt(
     Returns:
         Complete system prompt for structured summary generation
     """
-    base_prompt = SHOWROOM_SUMMARY_STRUCTURED_PROMPT
+    base_prompt = get_summary_structured_prompt()
 
     if include_field_instructions:
         field_instructions = extract_field_descriptions(summary_model)
@@ -316,7 +352,7 @@ def build_showroom_review_structured_prompt(
     Returns:
         Complete system prompt for structured review generation
     """
-    base_prompt = SHOWROOM_REVIEW_STRUCTURED_PROMPT
+    base_prompt = get_review_structured_prompt()
 
     if include_field_instructions:
         field_instructions = extract_field_descriptions(review_model)
@@ -369,7 +405,7 @@ def build_showroom_description_structured_prompt(
     Returns:
         Complete system prompt for structured description generation
     """
-    base_prompt = SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT
+    base_prompt = get_description_structured_prompt()
 
     if include_field_instructions:
         field_instructions = extract_field_descriptions(description_model)
@@ -412,6 +448,9 @@ def build_showroom_description_generation_prompt(
 
 DEFAULT_TEMPERATURE: float = 0.1
 
+# In-memory overrides loaded from a prompts file (Requirement 11.9)
+PROMPTS_FILE_OVERRIDES: dict[str, Any] = {}
+
 
 def get_temperature_for_action(
     action: Literal["summary", "review", "description"],
@@ -433,6 +472,19 @@ def get_temperature_for_action(
     """
     if explicit_temperature is not None:
         return float(explicit_temperature)
+
+    # Check prompts-file overrides first
+    temperature_override_keys = {
+        "summary": "SHOWROOM_SUMMARY_TEMPERATURE",
+        "review": "SHOWROOM_REVIEW_TEMPERATURE",
+        "description": "SHOWROOM_DESCRIPTION_TEMPERATURE",
+    }
+    override_key = temperature_override_keys.get(action)
+    if override_key and override_key in PROMPTS_FILE_OVERRIDES:
+        try:
+            return float(PROMPTS_FILE_OVERRIDES[override_key])
+        except (TypeError, ValueError):
+            pass
 
     mapping = {
         "summary": "SHOWROOM_SUMMARY_TEMPERATURE",
@@ -457,3 +509,60 @@ def get_temperature_for_action(
             pass
 
     return DEFAULT_TEMPERATURE
+
+
+def load_prompts_overrides(file_path: str) -> None:
+    """
+    Load prompt and temperature overrides from an external file.
+
+    Supports:
+    - Python files: define variables with the same names as defaults in this module
+      e.g., SHOWROOM_SUMMARY_STRUCTURED_PROMPT = "..."
+            SHOWROOM_REVIEW_TEMPERATURE = 0.2
+    - JSON files: a key-value mapping of variable names to values
+
+    Unknown keys are ignored. Missing keys fall back to defaults.
+    """
+    global PROMPTS_FILE_OVERRIDES
+
+    path = Path(file_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Prompts file not found: {file_path}")
+
+    # Reset before loading to ensure clean state per invocation
+    PROMPTS_FILE_OVERRIDES = {}
+
+    def _filter_keys(d: dict[str, Any]) -> dict[str, Any]:
+        allowed = {
+            # Prompt texts
+            "SHOWROOM_SUMMARY_BASE_PROMPT",
+            "SHOWROOM_SUMMARY_STRUCTURED_PROMPT",
+            "SHOWROOM_REVIEW_BASE_PROMPT",
+            "SHOWROOM_REVIEW_STRUCTURED_PROMPT",
+            "SHOWROOM_DESCRIPTION_BASE_PROMPT",
+            "SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT",
+            # Temperatures
+            "SHOWROOM_SUMMARY_TEMPERATURE",
+            "SHOWROOM_REVIEW_TEMPERATURE",
+            "SHOWROOM_DESCRIPTION_TEMPERATURE",
+        }
+        return {k: v for k, v in d.items() if k in allowed}
+
+    if path.suffix.lower() == ".py":
+        spec = importlib.util.spec_from_file_location("_showroom_prompts_overrides", str(path))
+        if spec and spec.loader:  # type: ignore
+            module = importlib.util.module_from_spec(spec)
+            assert spec.loader is not None
+            spec.loader.exec_module(module)  # type: ignore
+            loaded = {k: getattr(module, k) for k in dir(module) if k.isupper()}
+            PROMPTS_FILE_OVERRIDES = _filter_keys(loaded)
+        else:
+            raise RuntimeError(f"Failed to load Python prompts file: {file_path}")
+    elif path.suffix.lower() == ".json":
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            if not isinstance(data, dict):
+                raise ValueError("JSON prompts file must contain a top-level object")
+            PROMPTS_FILE_OVERRIDES = _filter_keys({str(k): v for k, v in data.items()})
+    else:
+        raise ValueError("Unsupported prompts file type. Use .py or .json")

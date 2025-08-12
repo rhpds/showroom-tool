@@ -553,6 +553,20 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
   4) default `0.1`
 - Integrated per-action temperature in `src/showroom_tool/graph_factory.py` so each command uses the resolved temperature
 
+### ✅ 11.9 Add support for a `--prompts-file` option extending the tools functionality - COMPLETED
+
+**User Story:** User wants to be able to try new prompts and temperatures without losing the defaults in `prompts.py`
+
+**✅ Implemented:**
+
+- Added `--prompts-file <FILE>` to all verbs; supports `.py` and `.json` files
+- Implemented loader in `src/showroom_tool/prompts.py` (`load_prompts_overrides`)
+- Overrides supported:
+  - Prompt strings: `SHOWROOM_*_BASE_PROMPT`, `SHOWROOM_*_STRUCTURED_PROMPT`
+  - Temperatures: `SHOWROOM_SUMMARY_TEMPERATURE`, `SHOWROOM_REVIEW_TEMPERATURE`, `SHOWROOM_DESCRIPTION_TEMPERATURE`
+- Missing keys fall back to defaults in `prompts.py`; CLI `--temperature` still overrides
+- Wired into processing via `ShowroomState.prompts_file` and graph load on start
+
 
 **Usage Examples (unchanged):**
 ```bash

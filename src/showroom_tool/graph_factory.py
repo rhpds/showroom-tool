@@ -23,7 +23,7 @@ from showroom_tool.shared_utilities import (
     build_showroom_summary_prompt,
     process_content_with_structured_output,
 )
-from showroom_tool.prompts import get_temperature_for_action
+from showroom_tool.prompts import get_temperature_for_action, load_prompts_overrides
 from showroom_tool.showroom import fetch_showroom_repository
 
 
@@ -104,6 +104,18 @@ async def process_showroom(state: ShowroomState) -> dict[str, Any]:
     command = state.command or "summary"
 
     try:
+        # Load prompts overrides if provided via CLI (Requirement 11.9)
+        if getattr(state, "prompts_file", None):
+            try:
+                load_prompts_overrides(state.prompts_file)  # type: ignore[attr-defined]
+                if state.verbose:
+                    print(f"📝 Loaded prompts overrides from: {state.prompts_file}")
+            except Exception as e:
+                return {
+                    "errors": [f"Failed to load prompts file: {e}"],
+                    "messages": ["Prompts override failed"],
+                    "final_output": {"success": False, "error": str(e)},
+                }
         if command == "summary":
             system_prompt, user_content = build_showroom_summary_prompt(showroom, ShowroomSummary)
             model_class = ShowroomSummary
@@ -202,6 +214,7 @@ async def process_showroom_with_graph(
     llm_provider: str | None = None,
     model: str | None = None,
     temperature: float | None = None,
+    prompts_file: str | None = None,
 ) -> dict[str, Any]:
     """
     Process a showroom repository using the LangGraph approach.
@@ -228,6 +241,7 @@ async def process_showroom_with_graph(
         llm_provider=llm_provider,
         model=model,
         temperature=temperature,
+        prompts_file=prompts_file,
         messages=[],
         errors=[],
         final_output={},

@@ -216,6 +216,9 @@ class ShowroomState(BaseModel):
     temperature: float | None = Field(
         default=None, description="Temperature for LLM generation"
     )
+    prompts_file: str | None = Field(
+        default=None, description="Optional path to prompts override file (.py or .json)"
+    )
 
     # Processing results
     showroom: Showroom | None = Field(default=None, description="The processed Showroom data")

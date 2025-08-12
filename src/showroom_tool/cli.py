@@ -184,6 +184,12 @@ def add_common_arguments(parser):
         choices=["verbose", "json", "adoc"],
         help="Output format: 'verbose' for rich console output (default), 'json' for clean JSON output, 'adoc' for AsciiDoc output",
     )
+    parser.add_argument(
+        "--prompts-file",
+        dest="prompts_file",
+        default=None,
+        help="Path to a prompts override file (.py or .json) to override defaults in prompts.py",
+    )
 
 
 def add_llm_arguments(parser):
@@ -263,6 +269,7 @@ async def handle_summary_command(args):
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
+            prompts_file=args.prompts_file,
         )
 
         if result.get("success"):
@@ -361,6 +368,7 @@ async def handle_review_command(args):
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
+            prompts_file=args.prompts_file,
         )
 
         if result.get("success"):
@@ -459,6 +467,7 @@ async def handle_description_command(args):
             llm_provider=args.llm_provider,
             model=args.model,
             temperature=args.temperature,
+            prompts_file=args.prompts_file,
         )
 
         if result.get("success"):
@@ -543,6 +552,7 @@ async def fetch_showroom_data(args):
             cache_dir=args.cache_dir,
             no_cache=args.no_cache,
             local_dir=args.local_dir,
+            prompts_file=args.prompts_file,
         )
 
         if not result.get("success", False):

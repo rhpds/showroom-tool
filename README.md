@@ -171,6 +171,10 @@ Choose your LLM provider with command line options:
 python showroom-tool.py summary <repo-url> --llm-provider gemini
 python showroom-tool.py summary <repo-url> --llm-provider openai
 python showroom-tool.py summary <repo-url> --llm-provider local
+
+# Override prompts/temperatures from a file (optional)
+showroom-tool summary <repo-url> --prompts-file ./my_prompts_overrides.py
+showroom-tool review <repo-url> --prompts-file ./overrides.json
 ```
 
 ### Example Output
