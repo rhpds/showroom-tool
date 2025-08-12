@@ -14,6 +14,12 @@ from typing import Any
 
 from pydantic import BaseModel
 
+# Import the tool version for attribution in outputs
+try:
+    from . import __version__ as TOOL_VERSION
+except Exception:
+    TOOL_VERSION = "unknown version"
+
 try:
     from jinja2 import Environment, FileSystemLoader, Template
     JINJA2_AVAILABLE = True
@@ -116,6 +122,7 @@ def render_basemodel_to_adoc(
         **model.model_dump(),
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "model_type": model.__class__.__name__,
+        "version": TOOL_VERSION,
     }
 
     # Add extra context if provided
