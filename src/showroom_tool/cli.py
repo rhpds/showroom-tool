@@ -23,6 +23,7 @@ try:
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
         build_showroom_summary_structured_prompt,
+        load_prompts_overrides,
     )
     from showroom_tool.shared_utilities import (
         print_basemodel,
@@ -45,6 +46,7 @@ except ImportError:
         build_showroom_description_structured_prompt,
         build_showroom_review_structured_prompt,
         build_showroom_summary_structured_prompt,
+        load_prompts_overrides,
     )
     from showroom_tool.shared_utilities import (
         print_basemodel,
@@ -227,6 +229,10 @@ async def handle_summary_command(args):
         console.print("[blue]Displaying standard Showroom lab summary analysis prompt...[/blue]")
 
         try:
+            # Requirement 11.9: Load prompts overrides early when showing prompt
+            if args.prompts_file:
+                load_prompts_overrides(args.prompts_file)
+
             # Build the standard prompt without requiring actual showroom data
             system_prompt = build_showroom_summary_structured_prompt(ShowroomSummary)
             console.print("\n[bold green]Summary Analysis Prompt:[/bold green]")
@@ -326,6 +332,9 @@ async def handle_review_command(args):
         console.print("[blue]Displaying standard Showroom lab review analysis prompt...[/blue]")
 
         try:
+            if args.prompts_file:
+                load_prompts_overrides(args.prompts_file)
+
             # Build the standard prompt without requiring actual showroom data
             system_prompt = build_showroom_review_structured_prompt(ShowroomReview)
             console.print("\n[bold green]Review Analysis Prompt:[/bold green]")
@@ -425,6 +434,9 @@ async def handle_description_command(args):
         console.print("[blue]Displaying standard Showroom lab description analysis prompt...[/blue]")
 
         try:
+            if args.prompts_file:
+                load_prompts_overrides(args.prompts_file)
+
             # Build the standard prompt without requiring actual showroom data
             system_prompt = build_showroom_description_structured_prompt(CatalogDescription)
             console.print("\n[bold green]Description Analysis Prompt:[/bold green]")
