@@ -158,6 +158,11 @@ export LOCAL_OPENAI_MODEL="your-local-model"
 export GEMINI_MODEL="gemini-2.0-flash-exp"  # default
 export OPENAI_MODEL="gpt-4o-2024-08-06"     # default
 export LLM_TEMPERATURE="0.1"                # default
+
+# Per-action temperatures (optional; override global)
+export SHOWROOM_SUMMARY_TEMPERATURE="0.1"
+export SHOWROOM_REVIEW_TEMPERATURE="0.1"
+export SHOWROOM_DESCRIPTION_TEMPERATURE="0.1"
 ```
 
 Choose your LLM provider with command line options:

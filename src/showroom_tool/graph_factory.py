@@ -23,6 +23,7 @@ from showroom_tool.shared_utilities import (
     build_showroom_summary_prompt,
     process_content_with_structured_output,
 )
+from showroom_tool.prompts import get_temperature_for_action
 from showroom_tool.showroom import fetch_showroom_repository
 
 
@@ -118,13 +119,16 @@ async def process_showroom(state: ShowroomState) -> dict[str, Any]:
                 "messages": ["Unsupported processing command"],
             }
 
+        # Resolve temperature per action (Requirement 11.8)
+        action_temperature = get_temperature_for_action(command, state.temperature)
+
         result, success, metadata = await process_content_with_structured_output(
             content=user_content,
             model_class=model_class,
             system_prompt=system_prompt,
             llm_provider=state.llm_provider,
             model=state.model,
-            temperature=state.temperature,
+            temperature=action_temperature,
             verbose=state.verbose,
         )
 

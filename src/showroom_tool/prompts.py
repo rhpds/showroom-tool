@@ -7,6 +7,9 @@ This module contains prompts and utilities for generating AI-powered
 summaries of Showroom lab content using structured prompts.
 """
 
+import os
+from typing import Literal
+
 from pydantic import BaseModel
 
 # Base prompt for Showroom lab summarization
@@ -403,3 +406,54 @@ def build_showroom_description_generation_prompt(
     user_content = format_showroom_content_for_prompt(showroom_data)
 
     return system_prompt, user_content
+
+
+# Temperature configuration helpers (Requirement 11.8)
+
+DEFAULT_TEMPERATURE: float = 0.1
+
+
+def get_temperature_for_action(
+    action: Literal["summary", "review", "description"],
+    explicit_temperature: float | None = None,
+) -> float:
+    """
+    Resolve the temperature to use for a given action with the following precedence:
+    1) explicit_temperature (CLI flag)
+    2) action-specific env var: SHOWROOM_SUMMARY_TEMPERATURE | SHOWROOM_REVIEW_TEMPERATURE | SHOWROOM_DESCRIPTION_TEMPERATURE
+    3) global env var: LLM_TEMPERATURE
+    4) DEFAULT_TEMPERATURE (0.1)
+
+    Args:
+        action: One of "summary", "review", or "description"
+        explicit_temperature: Optional temperature explicitly provided by user
+
+    Returns:
+        Final temperature value as float
+    """
+    if explicit_temperature is not None:
+        return float(explicit_temperature)
+
+    mapping = {
+        "summary": "SHOWROOM_SUMMARY_TEMPERATURE",
+        "review": "SHOWROOM_REVIEW_TEMPERATURE",
+        "description": "SHOWROOM_DESCRIPTION_TEMPERATURE",
+    }
+
+    specific_key = mapping.get(action)
+    if specific_key:
+        specific_val = os.getenv(specific_key)
+        if specific_val is not None and specific_val != "":
+            try:
+                return float(specific_val)
+            except ValueError:
+                pass
+
+    global_val = os.getenv("LLM_TEMPERATURE")
+    if global_val is not None and global_val != "":
+        try:
+            return float(global_val)
+        except ValueError:
+            pass
+
+    return DEFAULT_TEMPERATURE
