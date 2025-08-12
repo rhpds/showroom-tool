@@ -19,24 +19,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel
 
-# Base prompt for Showroom lab summarization
-SHOWROOM_SUMMARY_BASE_PROMPT = """You are an expert technical content analyst specializing in summarizing hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and provide comprehensive, actionable summaries.
-
-Your analysis should focus on:
-- Understanding the lab's educational objectives and target audience
-- Identifying key technical concepts, tools, and technologies covered
-- Extracting the learning progression and module structure
-- Highlighting practical skills and knowledge gained
-- Noting any prerequisites or dependencies
-- Summarizing the overall lab experience and outcomes
-
-Provide detailed, accurate summaries that would help technical sellers, educators, and learners understand the full scope and value of the lab content. Focus on practical insights and concrete details rather than generic descriptions.
-
-Your summary should be comprehensive enough to give readers a complete understanding of what the lab teaches, how it's structured, and what participants will accomplish by completing it."""
-
-
-# Specialized prompt for ShowroomSummary generation
-SHOWROOM_SUMMARY_STRUCTURED_PROMPT = """You are an expert technical content analyst specializing in analyzing Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and extract specific structured information.
+# Base system prompt for ShowroomSummary generation
+SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT = """You are an expert technical content analyst specializing in analyzing Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and extract specific structured information.
 
 ANALYSIS FOCUS:
 - Identify Red Hat products explicitly mentioned in the content (not implied or assumed)
@@ -53,21 +37,8 @@ CRITICAL INSTRUCTIONS:
 Be precise, accurate, and focus only on information that is clearly stated or directly demonstrated in the lab content."""
 
 
-# Base prompt for Showroom lab review
-SHOWROOM_REVIEW_BASE_PROMPT = """You are an expert technical content reviewer specializing in evaluating hands-on laboratory exercises and demo content. Your role is to provide constructive, detailed feedback on Showroom lab repositories across multiple quality dimensions.
-
-Your review should focus on:
-- Completeness: Assess if the content covers all necessary topics and provides complete learning experiences
-- Clarity: Evaluate how clear and understandable the instructions, explanations, and objectives are
-- Technical Detail: Analyze the depth and accuracy of technical information provided
-- Usefulness: Determine practical value for the target audience and real-world applicability
-- Business Value: Assess how well the content demonstrates business benefits and ROI
-
-Provide balanced, constructive feedback that helps content creators improve their labs. Focus on specific, actionable suggestions and maintain a professional, helpful tone throughout your review."""
-
-
-# Specialized prompt for ShowroomReview generation
-SHOWROOM_REVIEW_STRUCTURED_PROMPT = """You are an expert technical content reviewer specializing in evaluating Red Hat hands-on laboratory exercises and demo content. Your role is to provide constructive, detailed feedback on Showroom lab repositories across multiple quality dimensions.
+# Base system prompt for ShowroomReview generation
+SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT = """You are an expert technical content reviewer specializing in evaluating Red Hat hands-on laboratory exercises and demo content. Your role is to provide constructive, detailed feedback on Showroom lab repositories across multiple quality dimensions.
 
 REVIEW FOCUS:
 - Completeness: Assess if the content covers all necessary topics and provides complete learning experiences
@@ -90,21 +61,8 @@ CRITICAL INSTRUCTIONS:
 - Maintain professional, constructive tone throughout"""
 
 
-# Base prompt for Showroom lab catalog description generation
-SHOWROOM_DESCRIPTION_BASE_PROMPT = """You are an expert technical catalog writer specializing in creating compelling catalog entries for Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and generate catalog descriptions that accurately represent the content and attract the right audience.
-
-Your description should focus on:
-- Creating an engaging headline that captures the lab's essence
-- Identifying specific Red Hat products covered in the content
-- Determining target audiences who would benefit from the lab
-- Extracting key learning outcomes and value propositions
-- Crafting concise, action-oriented bullet points that highlight benefits
-
-Provide clear, compelling descriptions that would help technical buyers, educators, and learners quickly understand the lab's value and determine if it's right for their needs. Focus on concrete outcomes and practical skills gained rather than generic marketing language."""
-
-
-# Specialized prompt for CatalogDescription generation
-SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT = """You are an expert technical catalog writer specializing in creating compelling catalog entries for Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and generate structured catalog descriptions.
+# Base system prompt for CatalogDescription generation
+SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT = """You are an expert technical catalog writer specializing in creating compelling catalog entries for Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and generate structured catalog descriptions.
 
 ANALYSIS FOCUS:
 - Headline: Create a compelling, concise summary that captures the lab's core value proposition
@@ -176,56 +134,42 @@ def _get_override(name: str, default_value: Any) -> Any:
     return PROMPTS_FILE_OVERRIDES.get(name, default_value)
 
 
-def get_summary_base_prompt() -> str:
-    return _get_override("SHOWROOM_SUMMARY_BASE_PROMPT", SHOWROOM_SUMMARY_BASE_PROMPT)
+def get_summary_base_system_prompt() -> str:
+    return _get_override("SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT", SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT)
 
 
 def get_summary_structured_prompt() -> str:
-    return _get_override("SHOWROOM_SUMMARY_STRUCTURED_PROMPT", SHOWROOM_SUMMARY_STRUCTURED_PROMPT)
+    # Backward-compatible function name; now returns BASE_SYSTEM prompt
+    return get_summary_base_system_prompt()
 
 
-def get_review_base_prompt() -> str:
-    return _get_override("SHOWROOM_REVIEW_BASE_PROMPT", SHOWROOM_REVIEW_BASE_PROMPT)
+def get_review_base_system_prompt() -> str:
+    return _get_override("SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT", SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT)
 
 
 def get_review_structured_prompt() -> str:
-    return _get_override("SHOWROOM_REVIEW_STRUCTURED_PROMPT", SHOWROOM_REVIEW_STRUCTURED_PROMPT)
+    return get_review_base_system_prompt()
 
 
-def get_description_base_prompt() -> str:
-    return _get_override("SHOWROOM_DESCRIPTION_BASE_PROMPT", SHOWROOM_DESCRIPTION_BASE_PROMPT)
+def get_description_base_system_prompt() -> str:
+    return _get_override("SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT", SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT)
 
 
 def get_description_structured_prompt() -> str:
-    return _get_override("SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT", SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT)
+    return get_description_base_system_prompt()
 
 
 def build_showroom_summary_prompt(
     showroom_model: type[BaseModel],
     include_field_instructions: bool = True
 ) -> str:
-    """
-    Build an enhanced system prompt for Showroom lab summarization.
-
-    Args:
-        showroom_model: The Showroom Pydantic model class
-        include_field_instructions: Whether to include field-specific instructions
-
-    Returns:
-        Complete system prompt for LLM summarization
-    """
-    base_prompt = get_summary_base_prompt()
-
+    """Build an enhanced system prompt for Showroom summarization using base system prompt."""
+    base_prompt = get_summary_base_system_prompt()
     if include_field_instructions:
         field_instructions = extract_field_descriptions(showroom_model)
         if field_instructions:
-            enhanced_prompt = f"{base_prompt}\n\n{field_instructions}"
-        else:
-            enhanced_prompt = base_prompt
-    else:
-        enhanced_prompt = base_prompt
-
-    return enhanced_prompt
+            return f"{base_prompt}\n\n{field_instructions}"
+    return base_prompt
 
 
 def build_showroom_summary_structured_prompt(
@@ -242,7 +186,7 @@ def build_showroom_summary_structured_prompt(
     Returns:
         Complete system prompt for structured summary generation
     """
-    base_prompt = get_summary_structured_prompt()
+    base_prompt = get_summary_base_system_prompt()
 
     if include_field_instructions:
         field_instructions = extract_field_descriptions(summary_model)
@@ -352,7 +296,7 @@ def build_showroom_review_structured_prompt(
     Returns:
         Complete system prompt for structured review generation
     """
-    base_prompt = get_review_structured_prompt()
+    base_prompt = get_review_base_system_prompt()
 
     if include_field_instructions:
         field_instructions = extract_field_descriptions(review_model)
@@ -405,7 +349,7 @@ def build_showroom_description_structured_prompt(
     Returns:
         Complete system prompt for structured description generation
     """
-    base_prompt = get_description_structured_prompt()
+    base_prompt = get_description_base_system_prompt()
 
     if include_field_instructions:
         field_instructions = extract_field_descriptions(description_model)
@@ -534,13 +478,10 @@ def load_prompts_overrides(file_path: str) -> None:
 
     def _filter_keys(d: dict[str, Any]) -> dict[str, Any]:
         allowed = {
-            # Prompt texts
-            "SHOWROOM_SUMMARY_BASE_PROMPT",
-            "SHOWROOM_SUMMARY_STRUCTURED_PROMPT",
-            "SHOWROOM_REVIEW_BASE_PROMPT",
-            "SHOWROOM_REVIEW_STRUCTURED_PROMPT",
-            "SHOWROOM_DESCRIPTION_BASE_PROMPT",
-            "SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT",
+            # Prompt texts (refactored names)
+            "SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT",
+            "SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT",
+            "SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT",
             # Temperatures
             "SHOWROOM_SUMMARY_TEMPERATURE",
             "SHOWROOM_REVIEW_TEMPERATURE",

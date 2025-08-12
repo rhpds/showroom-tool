@@ -175,6 +175,12 @@ python showroom-tool.py summary <repo-url> --llm-provider local
 # Override prompts/temperatures from a file (optional)
 showroom-tool summary <repo-url> --prompts-file ./my_prompts_overrides.py
 showroom-tool review <repo-url> --prompts-file ./overrides.json
+
+# Prompts file keys (refactored):
+#  SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT
+#  SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT
+#  SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT
+#  SHOWROOM_SUMMARY_TEMPERATURE | SHOWROOM_REVIEW_TEMPERATURE | SHOWROOM_DESCRIPTION_TEMPERATURE
 ```
 
 ### Example Output

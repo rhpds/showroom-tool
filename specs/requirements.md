@@ -582,6 +582,18 @@ git push origin main --tags
 - ✅ Wired into processing via `ShowroomState.prompts_file` and graph load on start
 
 
+### ✅ 11.10 Refactor prompts - COMPLETED
+
+**User Story:** User wants to simplify the prompts by getting rid of all references to `SHOWROOM_*_BASE_PROMPT` for simplicity and ease of end user customization
+
+**✅ Implemented:**
+
+- ✅ Removed all `SHOWROOM_*_BASE_PROMPT` constants
+- ✅ Introduced unified `SHOWROOM_*_BASE_SYSTEM_PROMPT` constants and accessors
+- ✅ Updated prompt builders to use base system prompts
+- ✅ Ensured `--output-prompt` reflects overrides and new names
+- ✅ Updated documentation in `docs/prompting-guide.md`
+
 **Usage Examples (unchanged):**
 ```bash
 # Generate AsciiDoc summary

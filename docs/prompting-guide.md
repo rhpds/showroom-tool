@@ -18,13 +18,13 @@ The prompt assembly process follows a multi-layered approach to build comprehens
 
 Located in `src/showroom_tool/prompts.py`, these constants define the core AI persona and analysis focus:
 
-- **`SHOWROOM_SUMMARY_STRUCTURED_PROMPT`** - For lab summarization
-- **`SHOWROOM_REVIEW_STRUCTURED_PROMPT`** - For content review and scoring
-- **`SHOWROOM_DESCRIPTION_STRUCTURED_PROMPT`** - For catalog descriptions
+- **`SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT`** - For lab summarization
+- **`SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT`** - For content review and scoring
+- **`SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT`** - For catalog descriptions
 
 **Example modification:**
 ```python
-SHOWROOM_SUMMARY_STRUCTURED_PROMPT = """You are an expert technical content analyst specializing in analyzing Red Hat hands-on laboratory exercises and demo content...
+SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT = """You are an expert technical content analyst specializing in analyzing Red Hat hands-on laboratory exercises and demo content...
 
 ANALYSIS FOCUS:
 - Identify Red Hat products explicitly mentioned in the content
