@@ -49,7 +49,7 @@ The labs and demos are made available via a Catalog called RHDP and its associat
 
 **✅ Implemented:**
 
-- ✅ Created the Showroom BaseModel in `./src/config/basemodels.py`
+- ✅ Created the Showroom BaseModel in `./src/showroom_tool/basemodels.py`
 ```python
 lab_name: str = Field(..., description="The name of the lab extracted from the Showroom Git Repo")
 git_url: str = Field(..., description="The url of the Showroom Git Repo")
@@ -67,7 +67,7 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
 
 **✅ Implemented:**
 
-- ✅ Created the ShowroomModule BaseModel in `./src/config/basemodels.py`
+- ✅ Created the ShowroomModule BaseModel in `./src/showroom_tool/basemodels.py`
 ```python
 module_name: str = Field(..., description="The name of the lab module extracted from its level 1 header ie `^= My module name`")
 filename: str = Field(..., description="The filename of the module from the navigation file (e.g., '01-intro.adoc')")
@@ -120,7 +120,7 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
 
 - ✅ Read the example code in `./sample-code/graph_factory.py` especially function `graph_factory`
 - ✅ Implemented LangGraph integration with:
-  - ✅ `ShowroomState` Pydantic BaseModel for LangGraph state management in `src/config/basemodels.py`
+  - ✅ `ShowroomState` Pydantic BaseModel for LangGraph state management in `src/showroom_tool/basemodels.py`
   - ✅ `get_showroom` function encapsulating existing logic as a LangGraph node in `src/showroom_tool/graph_factory.py`
   - ✅ `graph_factory` function creating simple `START -> get_showroom -> END` graph
   - ✅ `process_showroom_with_graph` async function for easy graph execution
@@ -326,7 +326,7 @@ Total Modules: 9
 
 **✅ Implemented:**
 
-- ✅ Created the ShowroomReview BaseModel in `./src/config/basemodels.py` with scoring fields:
+- ✅ Created the ShowroomReview BaseModel in `./src/showroom_tool/basemodels.py` with scoring fields:
 ```python
 completeness: float = Field(..., ge=0, le=10, description="Score for completeness of content")
 completeness_feedback: str = Field(..., description="Constructive feedback regarding completeness of content")
@@ -383,7 +383,7 @@ review_summary: str = Field(..., description="3-4 sentence overall review summar
 
 **✅ Implemented:**
 
-- ✅ Created the CatalogDescription Pydantic BaseModel in `./src/config/basemodels.py`:
+- ✅ Created the CatalogDescription Pydantic BaseModel in `./src/showroom_tool/basemodels.py`:
 ```python
 headline: str = Field(..., description="Concise summary of the catalog item")
 products: list[str] = Field(..., description="List of Red Hat Products covered in the lab")
@@ -597,11 +597,16 @@ git push origin main --tags
 
 ### 11.11 Refactor prompting part 2
 
-**User Story:** User wants to separate the actual prompts, temperature, and other globals from the prompt building logic and make it more intuitive.
+**User Story:** User wants to separate the actual prompts, temperature, and other globals from the prompt building logic and make it more intuitive, and consolidate BaseModels into the main package.
 
 **Tasks:**
 
-- Create `config/prompts.py` for prompt text and temperatures
+- Consolidate BaseModels into the main package and remove the extra package:
+  - Move `src/config/basemodels.py` to `src/showroom_tool/basemodels.py`
+  - Remove the `src/config/` package entirely
+  - Update all imports to `from showroom_tool.basemodels import ...`
+
+- Create `config/prompts.py` **just** for prompts and temperatures
   - Move the `SHOWROOM_*_BASE_SYSTEM_PROMPT` to this file
   - Move the ` SHOWROOM_*_TEMPERATURE` to this file
 - Create a `config/settings.py` for other globals (provider, model, cache dirs, etc.)
@@ -612,6 +617,9 @@ git push origin main --tags
 - Make prompts-only file simple (just uppercase constants) to reduce cognitive load
 - Expose one loader that auto-discovers those paths so users don’t need to pass --prompts-file each time
 - For clarity rename `src/showroom_tool/prompts.py` to `src/showroom_tool/prompt_builder.py`
+
+- Development path hygiene:
+  - Ensure all local fallbacks insert only `project_root / "src"` into `sys.path` (avoid future top-level name collisions)
 
 
 **Usage Examples (unchanged):**
@@ -658,7 +666,7 @@ Beyond the original requirements, the following enhancements were added during d
 - **Verbose Mode**: Detailed processing information with filename visibility
 
 ### ✅ Technical Excellence
-- **Package Structure**: Proper src-layout with `src/showroom_tool/` and `src/config/`
+ - **Package Structure**: Proper src-layout with `src/showroom_tool/` (BaseModels consolidated here); project-level `config/` for prompts/settings overrides
 - **Entry Point**: Installable CLI tool via `uv pip install -e .`
 - **Error Handling**: Graceful handling of missing files, git errors, and malformed content
 - **Progress Indicators**: Rich progress bars for git operations
