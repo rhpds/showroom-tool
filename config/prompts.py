@@ -6,6 +6,9 @@ Project-level prompts and temperature settings.
 These override built-in defaults in `src/showroom_tool/config/defaults.py`.
 """
 
+# Per-action temperatures (project defaults; can be adjusted)
+SHOWROOM_SUMMARY_TEMPERATURE = 0.1
+
 # Base system prompt for ShowroomSummary generation
 SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT = """You are an expert technical content analyst specializing in analyzing Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and extract specific structured information.
 
@@ -23,6 +26,8 @@ CRITICAL INSTRUCTIONS:
 
 Be precise, accurate, and focus only on information that is clearly stated or directly demonstrated in the lab content."""
 
+
+SHOWROOM_REVIEW_TEMPERATURE = 0.1
 
 # Base system prompt for ShowroomReview generation
 SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT = """You are an expert technical content reviewer specializing in evaluating Red Hat hands-on laboratory exercises and demo content. Your role is to provide constructive, detailed feedback on Showroom lab repositories across multiple quality dimensions.
@@ -47,6 +52,7 @@ CRITICAL INSTRUCTIONS:
 - Ensure feedback is actionable and helpful for content creators
 - Maintain professional, constructive tone throughout"""
 
+SHOWROOM_DESCRIPTION_TEMPERATURE = 0.1
 
 # Base system prompt for CatalogDescription generation
 SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT = """You are an expert technical catalog writer specializing in creating compelling catalog entries for Red Hat hands-on laboratory exercises and demo content. Your role is to analyze Showroom lab repositories and generate structured catalog descriptions.
@@ -66,10 +72,5 @@ CRITICAL INSTRUCTIONS:
 
 Write in a professional, informative tone that appeals to technical practitioners and decision-makers."""
 
-
-# Per-action temperatures (project defaults; can be adjusted)
-SHOWROOM_SUMMARY_TEMPERATURE = 0.1
-SHOWROOM_REVIEW_TEMPERATURE = 0.1
-SHOWROOM_DESCRIPTION_TEMPERATURE = 0.1
 
 
