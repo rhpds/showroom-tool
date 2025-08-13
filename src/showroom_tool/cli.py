@@ -223,6 +223,14 @@ def add_llm_arguments(parser):
 
 async def handle_summary_command(args):
     """Handle the summary command to generate AI-powered summary."""
+    # Auto-discover project/user prompt overrides (Requirement 11.11)
+    try:
+        from showroom_tool import prompt_builder as _pb, prompts as _pr  # type: ignore
+        _discovered = _pb.get_prompts_and_settings()
+        for _k, _v in _discovered.items():
+            _pr.PROMPTS_FILE_OVERRIDES.setdefault(_k, _v)
+    except Exception:
+        pass
     # Check if user wants to see the prompt template
     if args.output_prompt:
         console.print("\n[bold blue]AI Summary Prompt Template[/bold blue]")
@@ -326,6 +334,14 @@ async def handle_summary_command(args):
 
 async def handle_review_command(args):
     """Handle the review command to generate AI-powered review."""
+    # Auto-discover project/user prompt overrides (Requirement 11.11)
+    try:
+        from showroom_tool import prompt_builder as _pb, prompts as _pr  # type: ignore
+        _discovered = _pb.get_prompts_and_settings()
+        for _k, _v in _discovered.items():
+            _pr.PROMPTS_FILE_OVERRIDES.setdefault(_k, _v)
+    except Exception:
+        pass
     # Check if user wants to see the prompt template
     if args.output_prompt:
         console.print("\n[bold blue]AI Review Prompt Template[/bold blue]")
@@ -428,6 +444,14 @@ async def handle_review_command(args):
 
 async def handle_description_command(args):
     """Handle the description command to generate AI-powered catalog description."""
+    # Auto-discover project/user prompt overrides (Requirement 11.11)
+    try:
+        from showroom_tool import prompt_builder as _pb, prompts as _pr  # type: ignore
+        _discovered = _pb.get_prompts_and_settings()
+        for _k, _v in _discovered.items():
+            _pr.PROMPTS_FILE_OVERRIDES.setdefault(_k, _v)
+    except Exception:
+        pass
     # Check if user wants to see the prompt template
     if args.output_prompt:
         console.print("\n[bold blue]AI Description Prompt Template[/bold blue]")
