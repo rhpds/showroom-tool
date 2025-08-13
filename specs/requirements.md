@@ -601,24 +601,24 @@ git push origin main --tags
 
 **✅ Implemented:**
 
-- Consolidate BaseModels into the main package and remove the extra package:
-  - Move `src/config/basemodels.py` to `src/showroom_tool/basemodels.py`
-  - Remove the `src/config/` package entirely
-  - Update all imports to `from showroom_tool.basemodels import ...`
+- ✅ Consolidate BaseModels into the main package and remove the extra package:
+  - ✅ Move `src/config/basemodels.py` to `src/showroom_tool/basemodels.py`
+  - ✅ Remove the `src/config/` package entirely
+  - ✅ Update all imports to `from showroom_tool.basemodels import ...`
 
-- Created `config/prompts.py` for prompts and temperatures (moved out of code)
-  - `SHOWROOM_*_BASE_SYSTEM_PROMPT` now defined here (project-level)
-  - `SHOWROOM_*_TEMPERATURE` now defined here (project-level)
-- Added built-in defaults at `src/showroom_tool/config/defaults.py` used when no overrides are present
-- Implemented `prompt_builder` auto-discovery and precedence in CLI:
-  - Project config: `./config/prompts.py` (and `./config/settings.py` when added)
-  - User config: `~/.config/showroom-tool/prompts.py`, `~/.config/showroom-tool/settings.py`
-  - Built-in defaults: `src/showroom_tool/config/defaults.py`
-- Kept `src/showroom_tool/prompts.py` as the public API; it now imports defaults and applies overrides
-- Ensured `project_root / "src"` is used in dev fallbacks to avoid path collisions
+- ✅ Created `config/prompts.py` for prompts and temperatures (moved out of code)
+  - ✅ `SHOWROOM_*_BASE_SYSTEM_PROMPT` now defined here (project-level)
+  - ✅ `SHOWROOM_*_TEMPERATURE` now defined here (project-level)
+- ✅ Added built-in defaults at `src/showroom_tool/config/defaults.py` used when no overrides are present
+- ✅ Implemented `prompt_builder` auto-discovery and precedence in CLI:
+  - ✅ Project config: `./config/prompts.py` (and `./config/settings.py` when added)
+  - ✅ User config: `~/.config/showroom-tool/prompts.py`, `~/.config/showroom-tool/settings.py`
+  - ✅ Built-in defaults: `src/showroom_tool/config/defaults.py`
+- ✅ Kept `src/showroom_tool/prompts.py` as the public API; it now imports defaults and applies overrides
+- ✅ Ensured `project_root / "src"` is used in dev fallbacks to avoid path collisions
 
-- Development path hygiene:
-  - Ensure all local fallbacks insert only `project_root / "src"` into `sys.path` (avoid future top-level name collisions)
+- ✅ Development path hygiene:
+  - ✅ Ensure all local fallbacks insert only `project_root / "src"` into `sys.path` (avoid future top-level name collisions)
 
 
 **Usage Examples (unchanged):**
