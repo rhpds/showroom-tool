@@ -594,6 +594,26 @@ git push origin main --tags
 - ✅ Ensured `--output-prompt` reflects overrides and new names
 - ✅ Updated documentation in `docs/prompting-guide.md`
 
+
+### 11.11 Refactor prompting part 2
+
+**User Story:** User wants to separate the actual prompts, temperature, and other globals from the prompt building logic and make it more intuitive.
+
+**Tasks:**
+
+- Create `config/prompts.py` for prompt text and temperatures
+  - Move the `SHOWROOM_*_BASE_SYSTEM_PROMPT` to this file
+  - Move the ` SHOWROOM_*_TEMPERATURE` to this file
+- Create a `config/settings.py` for other globals (provider, model, cache dirs, etc.)
+- Precedence: 
+  - Project config: ./config/prompts.py, ./config/settings.py
+  - User config (global): ~/.config/showroom-tool/prompts.py, ~/.config/showroom-tool/settings.py
+  - Built-in defaults: src/showroom_tool/config/defaults.py (never edited by users)
+- Make prompts-only file simple (just uppercase constants) to reduce cognitive load
+- Expose one loader that auto-discovers those paths so users don’t need to pass --prompts-file each time
+- For clarity rename `src/showroom_tool/prompts.py` to `src/showroom_tool/prompt_builder.py`
+
+
 **Usage Examples (unchanged):**
 ```bash
 # Generate AsciiDoc summary
