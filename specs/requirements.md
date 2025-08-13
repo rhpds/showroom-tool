@@ -653,6 +653,48 @@ git push origin main --tags
   - ✅ Fixed all outdated references and configuration paths
   
 
+### ✅ 11.13 Add CSV repository iterator utility script - COMPLETED
+
+**User Story:** User wants a batch processing utility to iterate through multiple showroom repositories defined in a CSV file and automatically generate AI-powered descriptions and summaries for each repository.
+
+**✅ Implemented:**
+
+- ✅ Created `utils/agv-iterator.sh` bash script for CSV-based repository processing
+- ✅ Robust CSV parsing with error handling and input validation:
+  - ✅ Checks for file existence and readability
+  - ✅ Validates command line arguments with helpful usage messages
+  - ✅ Handles whitespace issues in CSV data with automatic trimming
+  - ✅ Skips header row automatically to avoid processing column names
+- ✅ Environment variable management for each repository:
+  - ✅ Sets `DIRECTORY`, `GIT_URL`, and `GIT_REF` variables for each CSV row
+  - ✅ Exports variables to make them available to child processes
+  - ✅ Displays current values for debugging and monitoring progress
+- ✅ Integrated showroom-tool automation:
+  - ✅ Automatically changes to each repository directory (`cd "$DIRECTORY"`)
+  - ✅ Executes `showroom-tool description` with repository URL and reference
+  - ✅ Executes `showroom-tool summary` with repository URL and reference
+  - ✅ Outputs results as AsciiDoc files (`ai-description.adoc`, `ai-summary.adoc`)
+  - ✅ Processes each repository entry sequentially with progress tracking
+- ✅ Professional script structure:
+  - ✅ Executable permissions set automatically (`chmod +x`)
+  - ✅ Comprehensive error handling with `set -euo pipefail`
+  - ✅ Clear usage instructions and command-line help
+  - ✅ Progress indicators showing current directory and row processing
+  - ✅ Clean separation between processing logic and output formatting
+
+**Usage Example:**
+```bash
+# Create a CSV file with repository information
+echo "directory,git_url,git_ref" > repos.csv
+echo "/path/to/repo1,https://github.com/example/repo1.git,main" >> repos.csv
+echo "/path/to/repo2,https://github.com/example/repo2.git,v1.0.0" >> repos.csv
+
+# Run the batch processor
+./utils/agv-iterator.sh repos.csv
+```
+
+The script enables efficient batch processing of multiple showroom repositories, automatically generating consistent AI-powered documentation for each entry in the CSV file.
+
 
 **Usage Examples (unchanged):**
 showroom-tool summary --repo https://github.com/example/lab --output adoc
@@ -725,6 +767,18 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 9.2: Jinja2-based AsciiDoc template output for human-friendly documentation
 - ✅ Requirement 10.1: Improved CLI consistency with --output-prompt flag
 - ✅ Requirement 10.2: Comprehensive prompt engineering documentation with visual guides
+- ✅ Requirement 11.1: Refactored LangGraph nodes for future extensibility with two-node workflow
+- ✅ Requirement 11.2: Added local directory processing support with --dir option
+- ✅ Requirement 11.3: Created Release 0.1.0 with proper versioning and git tagging
+- ✅ Requirement 11.5: Added comprehensive test suite with pytest coverage
+- ✅ Requirement 11.6: Added version support with -V and --version CLI arguments
+- ✅ Requirement 11.7: Added showroom-tool version attribution to all generated outputs
+- ✅ Requirement 11.8: Extended prompts with per-action temperature configuration
+- ✅ Requirement 11.9: Added --prompts-file option for flexible prompt customization
+- ✅ Requirement 11.10: Refactored prompts to remove BASE_PROMPT complexity for user simplicity
+- ✅ Requirement 11.11: Refactored prompting architecture with configuration precedence system
+- ✅ Requirement 11.12: Refactored and updated documentation to reflect recent architectural changes
+- ✅ Requirement 11.13: Added CSV repository iterator utility script for batch processing
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
