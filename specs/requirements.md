@@ -609,6 +609,7 @@ git push origin main --tags
 - Create `config/prompts.py` **just** for prompts and temperatures
   - Move the `SHOWROOM_*_BASE_SYSTEM_PROMPT` to this file
   - Move the ` SHOWROOM_*_TEMPERATURE` to this file
+  - Added this file with stub constants for immediate project-level overrides
 - Create a `config/settings.py` for other globals (provider, model, cache dirs, etc.)
 - Precedence: 
   - Project config: ./config/prompts.py, ./config/settings.py
