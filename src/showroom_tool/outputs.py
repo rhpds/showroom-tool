@@ -29,12 +29,20 @@ except ImportError:
 
 # Try to import from the installed package structure
 try:
-    from showroom_tool.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    from showroom_tool.basemodels import (
+        CatalogDescription,
+        ShowroomReview,
+        ShowroomSummary,
+    )
 except ImportError:
     # Fall back to adding src to path (for development)
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root / "src"))
-    from showroom_tool.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    from showroom_tool.basemodels import (
+        CatalogDescription,
+        ShowroomReview,
+        ShowroomSummary,
+    )
 
 
 def get_template_directory() -> Path:

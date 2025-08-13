@@ -620,10 +620,41 @@ git push origin main --tags
 - ✅ Development path hygiene:
   - ✅ Ensure all local fallbacks insert only `project_root / "src"` into `sys.path` (avoid future top-level name collisions)
 
+### ✅ 11.12 Refactor and ensure docs reflect the recent changes in the 11.* Requirements - COMPLETED
+
+**User Story:** User is concerned recent changes have added cruft and technical debt in places and that the documentation is out of sync and makes working with the tool, and code, difficult.
+
+**✅ Implemented:**
+
+- ✅ Ensure the code is clean, well-structured, and DRY (Don't Repeat Yourself)
+  - ✅ Ran `ruff check . --fix` - all checks passed
+  - ✅ Verified all tests pass with `pytest -q`
+  - ✅ Code follows consistent patterns and best practices
+- ✅ Ensure `--help` and cli arguments are consistent with the current application
+  - ✅ Verified main help output is accurate and comprehensive
+  - ✅ All command-specific help displays correct options
+  - ✅ Arguments properly documented with current functionality
+- ✅ Ensure it lints cleanly and follows Python best practices
+  - ✅ All linting errors fixed automatically
+  - ✅ Code quality maintained throughout refactoring
+- ✅ Ensure everything in `./docs` is accurate and up to date
+  - ✅ Updated `docs/prompting-guide.md` with current configuration locations
+  - ✅ Fixed references to moved BaseModel files (`src/config/basemodels.py` → `src/showroom_tool/basemodels.py`)
+  - ✅ Updated prompt customization examples to use new configuration system
+  - ✅ Added explanation of how to edit Prompts and Temperature via `./config/prompts.py`
+  - ✅ Added comprehensive section on `--prompts-file` with `cp ./config/prompts.py` suggestion
+  - ✅ Documented configuration precedence (CLI > Project > User > Built-in)
+  - ✅ Added JSON format examples for prompts files
+- ✅ Ensure the README is up to date and accurate
+  - ✅ Updated project structure to reflect current codebase organization
+  - ✅ Added prompt customization section with practical examples
+  - ✅ Updated LLM configuration examples to show new auto-discovery system
+  - ✅ Added local directory processing documentation (`--dir` option)
+  - ✅ Fixed all outdated references and configuration paths
+  
+
 
 **Usage Examples (unchanged):**
-```bash
-# Generate AsciiDoc summary
 showroom-tool summary --repo https://github.com/example/lab --output adoc
 
 # Generate AsciiDoc review  

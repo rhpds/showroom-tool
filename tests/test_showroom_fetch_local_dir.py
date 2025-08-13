@@ -1,9 +1,7 @@
-import os
 import sys
 from pathlib import Path
 
 import pytest
-
 
 # Ensure src/ is importable in tests without editable install
 PROJECT_ROOT = Path(__file__).parent.parent

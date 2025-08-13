@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-
 # Ensure src/ is importable in tests without editable install
 PROJECT_ROOT = Path(__file__).parent.parent
 SRC_PATH = PROJECT_ROOT / "src"

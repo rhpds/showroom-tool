@@ -16,11 +16,17 @@ The prompt assembly process follows a multi-layered approach to build comprehens
 
 ### 1. Base Prompt Templates
 
-Located in `src/showroom_tool/prompts.py`, these constants define the core AI persona and analysis focus:
+These constants define the core AI persona and analysis focus for each command:
 
 - **`SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT`** - For lab summarization
 - **`SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT`** - For content review and scoring
 - **`SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT`** - For catalog descriptions
+
+**Configuration Locations (in order of precedence):**
+1. **CLI override**: Using `--prompts-file` argument
+2. **Project-level**: `./config/prompts.py` (recommended for customization)
+3. **User-level**: `~/.config/showroom-tool/prompts.py` (global user settings)
+4. **Built-in defaults**: `src/showroom_tool/config/defaults.py` (never edit directly)
 
 **Example modification:**
 ```python
@@ -40,7 +46,7 @@ CRITICAL INSTRUCTIONS:
 
 ### 2. BaseModel Field Descriptions
 
-The most powerful customization point is in the Pydantic BaseModel field descriptions in `src/config/basemodels.py`. These descriptions are automatically extracted and become field-specific AI instructions.
+The most powerful customization point is in the Pydantic BaseModel field descriptions in `src/showroom_tool/basemodels.py`. These descriptions are automatically extracted and become field-specific AI instructions.
 
 **Example from CatalogDescription:**
 ```python
@@ -135,16 +141,16 @@ IGNORE everything except this field's specific focus. Your analytical approach f
 
 ### Creating Custom Analysis Types
 
-1. **Create a new BaseModel** in `src/config/basemodels.py`:
+1. **Create a new BaseModel** in `src/showroom_tool/basemodels.py`:
    ```python
    class MyCustomAnalysis(BaseModel):
        field1: str = Field(..., description="Detailed AI instructions for field1")
        field2: list[str] = Field(..., description="Specific guidance for field2")
    ```
 
-2. **Add base prompt** in `src/showroom_tool/prompts.py`:
+2. **Add base prompt** in `config/prompts.py` (project-level) or your custom prompts file:
    ```python
-   MY_CUSTOM_PROMPT = """You are an expert in custom analysis..."""
+   MY_CUSTOM_BASE_SYSTEM_PROMPT = """You are an expert in custom analysis..."""
    ```
 
 3. **Create prompt builder function**:
@@ -161,6 +167,60 @@ To modify behavior without changing code:
 2. **Adjust base prompts** - Changes overall analysis approach
 3. **Add context hints** - Provides additional guidance for specific use cases
 
+## Editing Prompts and Temperatures
+
+### Project-Level Customization (Recommended)
+
+The easiest way to customize prompts and temperatures is through the project-level configuration file `./config/prompts.py`:
+
+```python
+# Edit ./config/prompts.py to override defaults
+
+# Per-action temperatures (0.0 = deterministic, 1.0 = creative)
+SHOWROOM_SUMMARY_TEMPERATURE = 0.1
+SHOWROOM_REVIEW_TEMPERATURE = 0.2
+SHOWROOM_DESCRIPTION_TEMPERATURE = 0.1
+
+# Base system prompts for each command
+SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT = """Your custom summary prompt here..."""
+SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT = """Your custom review prompt here..."""
+SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT = """Your custom description prompt here..."""
+```
+
+Changes to `./config/prompts.py` are automatically detected and used by all commands.
+
+### Using Custom Prompts Files
+
+For experimentation or sharing prompt configurations, use the `--prompts-file` option:
+
+```bash
+# Create a custom prompts file (start with the project template)
+cp ./config/prompts.py ./my_experimental_prompts.py
+
+# Edit your custom file with new prompts or temperatures
+# Then use it with any command:
+showroom-tool summary <repo-url> --prompts-file ./my_experimental_prompts.py
+showroom-tool review <repo-url> --prompts-file ./my_custom_review.py
+
+# You can also use JSON format:
+showroom-tool description <repo-url> --prompts-file ./prompts.json
+```
+
+**JSON format example:**
+```json
+{
+  "SHOWROOM_SUMMARY_TEMPERATURE": 0.2,
+  "SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT": "Your JSON-formatted prompt here..."
+}
+```
+
+### User-Level Global Settings
+
+For personal preferences across all projects, create:
+`~/.config/showroom-tool/prompts.py`
+
+This follows the same format as project-level configuration but applies globally.
+
 ## Testing Your Prompt Changes
 
 Use the `--output-prompt` flag to see the complete assembled prompt:
@@ -174,6 +234,9 @@ showroom-tool review --output-prompt
 
 # View complete description prompt
 showroom-tool description --output-prompt
+
+# Test with custom prompts file
+showroom-tool summary --output-prompt --prompts-file ./my_custom_prompts.py
 ```
 
 This shows you exactly what the AI receives, including:

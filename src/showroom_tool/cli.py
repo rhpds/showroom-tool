@@ -13,8 +13,12 @@ from rich.console import Console
 
 # Try to import from the installed package structure
 try:
-    from showroom_tool.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
     from showroom_tool import __version__
+    from showroom_tool.basemodels import (
+        CatalogDescription,
+        ShowroomReview,
+        ShowroomSummary,
+    )
     from showroom_tool.outputs import (
         check_jinja2_availability,
         output_basemodel_as_adoc,
@@ -36,8 +40,12 @@ except ImportError:
     # Fall back to adding the project root to path (for development)
     project_root = Path(__file__).parent.parent.parent
     sys.path.insert(0, str(project_root / "src"))
-    from showroom_tool.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
     from showroom_tool import __version__
+    from showroom_tool.basemodels import (
+        CatalogDescription,
+        ShowroomReview,
+        ShowroomSummary,
+    )
     from showroom_tool.outputs import (
         check_jinja2_availability,
         output_basemodel_as_adoc,
@@ -225,7 +233,8 @@ async def handle_summary_command(args):
     """Handle the summary command to generate AI-powered summary."""
     # Auto-discover project/user prompt overrides (Requirement 11.11)
     try:
-        from showroom_tool import prompt_builder as _pb, prompts as _pr  # type: ignore
+        from showroom_tool import prompt_builder as _pb  # type: ignore
+        from showroom_tool import prompts as _pr
         _discovered = _pb.get_prompts_and_settings()
         for _k, _v in _discovered.items():
             _pr.PROMPTS_FILE_OVERRIDES.setdefault(_k, _v)
@@ -336,7 +345,8 @@ async def handle_review_command(args):
     """Handle the review command to generate AI-powered review."""
     # Auto-discover project/user prompt overrides (Requirement 11.11)
     try:
-        from showroom_tool import prompt_builder as _pb, prompts as _pr  # type: ignore
+        from showroom_tool import prompt_builder as _pb  # type: ignore
+        from showroom_tool import prompts as _pr
         _discovered = _pb.get_prompts_and_settings()
         for _k, _v in _discovered.items():
             _pr.PROMPTS_FILE_OVERRIDES.setdefault(_k, _v)
@@ -446,7 +456,8 @@ async def handle_description_command(args):
     """Handle the description command to generate AI-powered catalog description."""
     # Auto-discover project/user prompt overrides (Requirement 11.11)
     try:
-        from showroom_tool import prompt_builder as _pb, prompts as _pr  # type: ignore
+        from showroom_tool import prompt_builder as _pb  # type: ignore
+        from showroom_tool import prompts as _pr
         _discovered = _pb.get_prompts_and_settings()
         for _k, _v in _discovered.items():
             _pr.PROMPTS_FILE_OVERRIDES.setdefault(_k, _v)

@@ -176,11 +176,11 @@ python showroom-tool.py summary <repo-url> --llm-provider local
 showroom-tool summary <repo-url> --prompts-file ./my_prompts_overrides.py
 showroom-tool review <repo-url> --prompts-file ./overrides.json
 
-# Prompts file keys (refactored):
-#  SHOWROOM_SUMMARY_BASE_SYSTEM_PROMPT
-#  SHOWROOM_REVIEW_BASE_SYSTEM_PROMPT
-#  SHOWROOM_DESCRIPTION_BASE_SYSTEM_PROMPT
-#  SHOWROOM_SUMMARY_TEMPERATURE | SHOWROOM_REVIEW_TEMPERATURE | SHOWROOM_DESCRIPTION_TEMPERATURE
+# Prompts are automatically discovered from:
+#  1. CLI: --prompts-file argument (highest priority)
+#  2. Project: ./config/prompts.py (recommended for customization)
+#  3. User: ~/.config/showroom-tool/prompts.py (global settings)
+#  4. Built-in: src/showroom_tool/config/defaults.py (never edit)
 ```
 
 ### Example Output
@@ -217,6 +217,36 @@ Total Modules: 9
   "lab_summary": "This hands-on lab introduces participants to Llama Stack..."
 }
 ```
+
+### Prompt Customization
+
+The tool provides multiple ways to customize AI prompts and temperatures:
+
+#### Quick Customization
+Edit the project-level configuration file to override defaults:
+```bash
+# Edit project prompts and temperatures
+vi ./config/prompts.py
+
+# Changes are automatically detected and used
+showroom-tool summary <repo-url>
+```
+
+#### Experimental/Shared Prompts
+```bash
+# Create experimental prompts file from template
+cp ./config/prompts.py ./my_experiment.py
+
+# Edit and test with any command
+showroom-tool summary <repo-url> --prompts-file ./my_experiment.py
+showroom-tool review <repo-url> --prompts-file ./custom_review.json
+```
+
+#### Configuration Precedence
+1. **CLI**: `--prompts-file` argument (highest priority)
+2. **Project**: `./config/prompts.py` (recommended for customization)
+3. **User**: `~/.config/showroom-tool/prompts.py` (global settings)
+4. **Built-in**: `src/showroom_tool/config/defaults.py` (never edit directly)
 
 ### Caching System
 
@@ -277,13 +307,21 @@ pip install -e .
 ```
 showroom-tool/
 ├── src/                         # Source code (Python package layout)
-│   ├── showroom_tool/          # Main CLI package
-│   │   ├── __init__.py         # Package initialization
-│   │   ├── __main__.py         # Module entry point
-│   │   └── cli.py              # CLI implementation and core logic
-│   └── config/                 # Configuration package
-│       ├── __init__.py         # Config package init
-│       └── basemodels.py       # Pydantic BaseModels (Showroom, ShowroomModule)
+│   └── showroom_tool/          # Main CLI package
+│       ├── __init__.py         # Package initialization
+│       ├── __main__.py         # Module entry point
+│       ├── cli.py              # CLI implementation and core logic
+│       ├── basemodels.py       # Pydantic BaseModels (Showroom, ShowroomModule, etc.)
+│       ├── prompts.py          # Public API for prompts and prompt building
+│       ├── prompt_builder.py   # Configuration discovery and merging logic
+│       ├── shared_utilities.py # LLM integration and prompt utilities
+│       ├── showroom.py         # Repository fetching and processing
+│       ├── outputs.py          # Template rendering and output formatting
+│       ├── graph_factory.py    # LangGraph workflow definitions
+│       └── config/             # Built-in defaults (never edit directly)
+│           └── defaults.py     # Default prompts and settings
+├── config/                      # Project-level configuration (edit these!)
+│   └── prompts.py              # Project prompts and temperature overrides
 ├── specs/                       # Project specifications
 │   ├── requirements.md         # Detailed requirements and status
 │   ├── structure.md            # Project structure documentation
@@ -319,6 +357,19 @@ showroom-tool <repo-url> --ref v1.2.3
 
 # Use specific commit
 showroom-tool <repo-url> --ref a1b2c3d4
+```
+
+### Local Directory Processing
+
+For development and testing, you can analyze local directories without cloning:
+
+```bash
+# Analyze local clone (bypass git operations)
+showroom-tool summary --dir ./my-local-showroom
+
+# Works with all commands and output formats
+showroom-tool review --dir /path/to/showroom --output json
+showroom-tool description --dir ~/work/showroom-lab --verbose
 ```
 
 ### Cache Management
