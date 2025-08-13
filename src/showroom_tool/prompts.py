@@ -507,3 +507,8 @@ def load_prompts_overrides(file_path: str) -> None:
             PROMPTS_FILE_OVERRIDES = _filter_keys({str(k): v for k, v in data.items()})
     else:
         raise ValueError("Unsupported prompts file type. Use .py or .json")
+
+
+# Backwards-compat shim: allow imports from showroom_tool.prompts to continue working
+# after introducing prompt_builder and external config discovery in Requirement 11.11.
+# Existing code continues to import builder functions from this module.

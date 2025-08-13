@@ -13,7 +13,7 @@ from rich.console import Console
 
 # Try to import from the installed package structure
 try:
-    from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    from showroom_tool.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
     from showroom_tool import __version__
     from showroom_tool.outputs import (
         check_jinja2_availability,
@@ -35,8 +35,8 @@ try:
 except ImportError:
     # Fall back to adding the project root to path (for development)
     project_root = Path(__file__).parent.parent.parent
-    sys.path.insert(0, str(project_root))
-    from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+    sys.path.insert(0, str(project_root / "src"))
+    from showroom_tool.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
     from showroom_tool import __version__
     from showroom_tool.outputs import (
         check_jinja2_availability,

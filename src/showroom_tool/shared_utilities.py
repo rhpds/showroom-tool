@@ -16,7 +16,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from config.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
+from showroom_tool.basemodels import CatalogDescription, ShowroomReview, ShowroomSummary
 
 # Optional OpenAI imports for LLM functionality
 try:

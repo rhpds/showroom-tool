@@ -11,7 +11,7 @@ from typing import Any, Literal, cast
 
 from langgraph.graph import END, StateGraph
 
-from config.basemodels import (
+from showroom_tool.basemodels import (
     CatalogDescription,
     ShowroomReview,
     ShowroomState,

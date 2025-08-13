@@ -12,7 +12,7 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 
-from config.basemodels import Showroom, ShowroomModule  # noqa: E402
+from showroom_tool.basemodels import Showroom, ShowroomModule  # noqa: E402
 
 
 @pytest.mark.asyncio

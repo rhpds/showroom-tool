@@ -20,13 +20,13 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 
 # Try to import from the installed package structure
 try:
-    from config.basemodels import Showroom, ShowroomModule
+    from showroom_tool.basemodels import Showroom, ShowroomModule
 except ImportError:
-    # Fall back to adding the project root to path (for development)
+    # Fall back to adding src to path (for development)
     import sys
     project_root = Path(__file__).parent.parent.parent
-    sys.path.insert(0, str(project_root))
-    from config.basemodels import Showroom, ShowroomModule
+    sys.path.insert(0, str(project_root / "src"))
+    from showroom_tool.basemodels import Showroom, ShowroomModule
 
 console = Console()
 
