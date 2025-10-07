@@ -163,11 +163,11 @@ def add_common_arguments(parser):
         "repo_url", nargs="?", help="Git repository URL containing the showroom lab"
     )
     parser.add_argument(
-        "--repo",
+        "--git-repo",
         help="Git repository URL containing the showroom lab (alternative to positional argument)",
     )
     parser.add_argument(
-        "--ref",
+        "--git-ref",
         default="main",
         help="Git reference (branch, tag, or commit) to use (default: main)",
     )
@@ -568,8 +568,8 @@ async def fetch_showroom_data(args):
     # Determine output mode
     is_json_output = getattr(args, 'output', 'verbose') == "json"
 
-    # Determine the repository URL (from positional arg or --repo flag)
-    repo_url = args.repo_url or args.repo
+    # Determine the repository URL (from positional arg or --git-repo flag)
+    repo_url = args.repo_url or args.git_repo
 
     if not repo_url and not args.local_dir:
         if is_json_output:
@@ -594,7 +594,7 @@ async def fetch_showroom_data(args):
         # For JSON output, suppress verbose output from LangGraph
         result = await process_showroom_with_graph(
             git_url=repo_url or "",
-            git_ref=args.ref,
+            git_ref=args.git_ref,
             verbose=args.verbose and not is_json_output,
             cache_dir=args.cache_dir,
             no_cache=args.no_cache,

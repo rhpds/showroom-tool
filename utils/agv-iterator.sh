@@ -74,8 +74,8 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r directory git_url git_ref; do
   echo "  Processing entry $row_count..."
   cd "$DIRECTORY"
   echo $PWD
-  showroom-tool description --repo "$GIT_URL" --ref "$GIT_REF" --output adoc >ai-description.adoc
-  showroom-tool summary --repo "$GIT_URL" --ref "$GIT_REF" --output adoc >ai-summary.adoc
+  showroom-tool description --git-repo "$GIT_URL" --git-ref "$GIT_REF" --output adoc >ai-description.adoc
+  showroom-tool summary --git-repo "$GIT_URL" --git-ref "$GIT_REF" --output adoc >ai-summary.adoc
   # Your code here
 
 done

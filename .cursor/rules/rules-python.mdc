@@ -9,15 +9,15 @@ alwaysApply: false
 ## General Rules
 
 - Clear project structure with separate directories for source code, tests, docs, and config.
-- Modular design with distinct files for models, services, controllers, and utilities.
-- Well commented code and functions throughout **strive for clarity**
-- Detailed documentation using docstrings and README files.
-- Configuration management using environment variables.
-- Avoid overly complex code and configuration **strive for simplicity**
-- Crete comprehensive testing with pytest.
-- Dependency management via uv and virtual environments.
+- Use a modular design with separate files for models, services, controllers, and utilities.
+- Write well-commented code and functions to ensure clarity.
+- Provide detailed documentation using docstrings and README files.
+- Manage configuration using environment variables.
+- Strive for simplicity and avoid overly complex code or configuration.
+- Create comprehensive tests using `pytest`.
+- Manage dependencies with `uv` and Python virtual environments.
 - Code style consistency using Ruff.
-- Linting via Ruff.
+- Lint via Ruff.
 - AI-friendly coding practices: descriptive names, type hints, detailed comments, and rich error context.
 
 ## Runtime Rules

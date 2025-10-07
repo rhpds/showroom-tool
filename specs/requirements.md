@@ -97,9 +97,9 @@ modules: list[ShowroomModule] = Field(..., description="The Showroom Lab modules
 
 - ✅ Created the `showroom-tool` CLI entry point
 - ✅ Created CLI argument processor in `src/showroom_tool/cli.py` that supports:
-  - `--repo` argument pointing to the repository
+  - `--git-repo` argument pointing to the repository
   - Positional argument support: `showroom-tool http://example.com/my_showroom`
-  - `--ref` flag for git branches/tags/commits
+  - `--git-ref` flag for git branches/tags/commits
   - `--verbose` flag for detailed output
 - ✅ Populated the Showroom BaseModel:
   - `git_url`: Extracted from CLI arguments
@@ -349,7 +349,7 @@ review_summary: str = Field(..., description="3-4 sentence overall review summar
   - ✅ `build_showroom_review_structured_prompt()` - builds structured review prompts
   - ✅ `build_showroom_review_generation_prompt()` - complete review prompt pipeline
 - ✅ Added `review` command to CLI with identical functionality to summary:
-  - ✅ Same command line options: `--repo`, `--ref`, `--verbose`, `--output`, `--llm-provider`, etc.
+  - ✅ Same command line options: `--git-repo`, `--git-ref`, `--verbose`, `--output`, `--llm-provider`, etc.
   - ✅ Support for both verbose and JSON output modes
   - ✅ Detailed showroom display in verbose mode
   - ✅ AI-powered review generation with structured scoring and feedback
@@ -399,7 +399,7 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
   - ✅ `save_description_to_workspace()` - saves description outputs to workspace
   - ✅ `build_showroom_description_prompt()` - builds complete description system prompts
 - ✅ Added `description` command to CLI with identical functionality to summary and review:
-  - ✅ Same command line options: `--repo`, `--ref`, `--verbose`, `--output`, `--llm-provider`, etc.
+  - ✅ Same command line options: `--git-repo`, `--git-ref`, `--verbose`, `--output`, `--llm-provider`, etc.
   - ✅ Support for both verbose and JSON output modes
   - ✅ Detailed showroom display in verbose mode
   - ✅ AI-powered description generation with structured catalog fields
@@ -482,7 +482,7 @@ lab_bullets: list[str] = Field(..., description="3 to 6 short 1 liners of the ke
   - ✅ Bypasses caching/cloning; uses the directory directly
 - ✅ Extended LangGraph `ShowroomState` with `local_dir` and plumbed through `get_showroom`
 - ✅ Updated `fetch_showroom_repository` to accept `local_dir` and validate `.git`
-- ✅ Enhanced CLI validation: require either `<repo_url>`/`--repo` or `--dir`; printed clear error messages when missing
+- ✅ Enhanced CLI validation: require either `<repo_url>`/`--git-repo` or `--dir`; printed clear error messages when missing
 - ✅ All output modes (verbose/json/adoc) work unchanged
 
 
@@ -682,6 +682,24 @@ git push origin main --tags
   - ✅ Progress indicators showing current directory and row processing
   - ✅ Clean separation between processing logic and output formatting
 
+### ✅ 11.14 CLI cleanup for clarity - COMPLETED
+
+**User Story:** User finds the flags `--repo` and `--ref` unclear, wants better conventions with `--git-repo` and `--git-ref`
+
+**✅ Implemented:**
+
+- ✅ Renamed CLI argument `--repo` to `--git-repo` in `src/showroom_tool/cli.py`
+- ✅ Renamed CLI argument `--ref` to `--git-ref` in `src/showroom_tool/cli.py`
+- ✅ Updated argument parsing to use `args.git_repo` and `args.git_ref` internally
+- ✅ Ensured functionality remains exactly the same with new flag names
+- ✅ Updated help text automatically displays new flag names in CLI output
+- ✅ Updated all references in `./utils/agv-iterator.sh` to use new flag names
+- ✅ Updated all references in `README.md` examples to use new flag names
+- ✅ Updated all references in `specs/requirements.md` examples to use new flag names
+- ✅ Verified old flags are properly rejected as unrecognized arguments
+- ✅ Tested that new flags work correctly with argument parsing and processing
+
+
 **Usage Example:**
 ```bash
 # Create a CSV file with repository information
@@ -697,13 +715,13 @@ The script enables efficient batch processing of multiple showroom repositories,
 
 
 **Usage Examples (unchanged):**
-showroom-tool summary --repo https://github.com/example/lab --output adoc
+showroom-tool summary --git-repo https://github.com/example/lab --output adoc
 
 # Generate AsciiDoc review  
-showroom-tool review --repo https://github.com/example/lab --output adoc
+showroom-tool review --git-repo https://github.com/example/lab --output adoc
 
 # Generate AsciiDoc catalog description
-showroom-tool description --repo https://github.com/example/lab --output adoc
+showroom-tool description --git-repo https://github.com/example/lab --output adoc
 ```
 
 
@@ -779,6 +797,7 @@ All original requirements **COMPLETED** ✅:
 - ✅ Requirement 11.11: Refactored prompting architecture with configuration precedence system
 - ✅ Requirement 11.12: Refactored and updated documentation to reflect recent architectural changes
 - ✅ Requirement 11.13: Added CSV repository iterator utility script for batch processing
+- ✅ Requirement 11.14: CLI cleanup for clarity with --git-repo and --git-ref flag renaming
 
 **Additional enhancements** implemented for superior user experience and robustness.
 
@@ -797,9 +816,9 @@ showroom-tool review https://github.com/example/my-showroom
 showroom-tool description https://github.com/example/my-showroom
 
 # With specific branch and verbose output  
-showroom-tool summary --repo https://github.com/example/my-showroom --ref develop --verbose
-showroom-tool review --repo https://github.com/example/my-showroom --ref develop --verbose
-showroom-tool description --repo https://github.com/example/my-showroom --ref develop --verbose
+showroom-tool summary --git-repo https://github.com/example/my-showroom --git-ref develop --verbose
+showroom-tool review --git-repo https://github.com/example/my-showroom --git-ref develop --verbose
+showroom-tool description --git-repo https://github.com/example/my-showroom --git-ref develop --verbose
 
 # Clean JSON output for automation/piping
 showroom-tool summary https://github.com/example/my-showroom --output json | jq

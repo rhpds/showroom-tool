@@ -124,7 +124,7 @@ showroom-tool review https://github.com/example/my-showroom
 showroom-tool description https://github.com/example/my-showroom
 
 # Use specific branch or tag
-showroom-tool summary https://github.com/example/my-showroom --ref develop
+showroom-tool summary https://github.com/example/my-showroom --git-ref develop
 
 # Enable verbose output for detailed processing
 showroom-tool summary https://github.com/example/my-showroom --verbose
@@ -350,13 +350,13 @@ showroom-tool/
 
 ```bash
 # Use specific branch
-showroom-tool <repo-url> --ref feature-branch
+showroom-tool <repo-url> --git-ref feature-branch
 
 # Use specific tag
-showroom-tool <repo-url> --ref v1.2.3
+showroom-tool <repo-url> --git-ref v1.2.3
 
 # Use specific commit
-showroom-tool <repo-url> --ref a1b2c3d4
+showroom-tool <repo-url> --git-ref a1b2c3d4
 ```
 
 ### Local Directory Processing
